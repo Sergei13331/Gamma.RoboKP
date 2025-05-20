@@ -1,12 +1,10 @@
 using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Repositories;
 using Gamma.RoboKP.Application.Services;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Infrastructure.Context;
-using Gamma.RoboKP.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -67,9 +65,6 @@ public static class ServiceCollectionsExtensions
     
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
-        //builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
-        
         return builder;
     }
 

@@ -9,15 +9,16 @@ namespace Gamma.RoboKP.Controllers;
 public class UserController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<ActionResult> RegisterUser(UserRegisterDto userRegisterDto)
+    public async Task<ActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
     {
         var result =  await authService.Register(userRegisterDto);
         return Ok(result);
     }
     [HttpPost("login")]
-    public async Task<ActionResult> Login(UserLoginDto userLoginDto)
+    public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
     {
-        return Ok();
+        var result = await authService.Login(userLoginDto);
+        return Ok(result);
     }
 
     [HttpGet]

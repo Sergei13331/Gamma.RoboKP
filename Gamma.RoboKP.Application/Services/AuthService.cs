@@ -1,36 +1,28 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Repositories;
 using Gamma.RoboKP.Application.Models.Authentication;
 using Gamma.RoboKP.Domain.Entities;
-using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
+using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
 public class AuthService(IOptions<AuthOptions> authOptions,
-    UserManager<UserEntity> userManager) : IAuthService
+    UserManager<UserEntity> userManager, IMapper mapper) : IAuthService
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
     public async Task<UserResponse> Register(UserRegisterDto userRegisterDto)
     {
-        if (string.IsNullOrWhiteSpace(userRegisterDto.Email))
-            throw new ArgumentException("Email обязателен");
-        var existingUser = await userManager.FindByEmailAsync(userRegisterDto.Email);
-        
-        if (existingUser != null)
-        {
-            throw new DuplicateEntityException($"Email {userRegisterDto.Email} already exists");
-        }
-
-        var createUserResult = await userManager.CreateAsync(new UserEntity
+        var entity = new UserEntity
         {
             FirstName = userRegisterDto.Name,
             Surname = userRegisterDto.Surname,
@@ -39,7 +31,20 @@ public class AuthService(IOptions<AuthOptions> authOptions,
             Email = userRegisterDto.Email,
             Company = userRegisterDto.Company,
             UserName = userRegisterDto.Email,
-        }, userRegisterDto.Password);
+        };
+        
+        var existingUser = await userManager.FindByEmailAsync(entity.Email);
+        
+        if (existingUser != null)
+        {
+            throw new NotValidUserException(
+                entity,
+                new List<IdentityError>() { new IdentityError() {
+                    Description="Пользователь с такой почтой уже существует",
+                    Code="Email Duplicate"} });
+        }
+        
+        var createUserResult = await userManager.CreateAsync(entity, userRegisterDto.Password);
 
         if (createUserResult.Succeeded)
         {
@@ -70,9 +75,35 @@ public class AuthService(IOptions<AuthOptions> authOptions,
     }
     
 
-    public Task<UserResponse> Login(UserLoginDto userLoginDto)
+    public async Task<UserResponse> Login(UserLoginDto userLoginDto)
     {
-        throw new NotImplementedException();
+        var user = await userManager.FindByEmailAsync(userLoginDto.Email);
+        if (user == null)
+        {
+            throw new EntityNotFoundException($"Пользователь с почтой {userLoginDto.Email} не найден");
+        }
+        var checkPasswordResult = await userManager.CheckPasswordAsync(user, userLoginDto.Password);
+        
+        if (checkPasswordResult)
+        {
+            var userRole = await userManager.GetRolesAsync(user);
+
+            var userResponse = new UserResponse
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                SurName = user.Surname,
+                LastName = user.LastName,
+                Role = userRole.FirstOrDefault()!,
+                Status = user.Status,
+                Email = user.Email,
+                Company = user.Company,
+                UserName = user.UserName,
+            };
+            return GenerateToken(userResponse);
+        }
+
+        throw new AuthenticationException("Неверный пароль");
     }
     
     public UserResponse GenerateToken(UserResponse userRegisterModel)
