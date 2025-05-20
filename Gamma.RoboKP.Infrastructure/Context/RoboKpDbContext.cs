@@ -1,19 +1,21 @@
-using Gamma.RoboKP.Domain.Entites;
+using Gamma.RoboKP.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gamma.RoboKP.Infrastructure.Context;
 
-public class RoboKpDbContext : DbContext
+public class RoboKpDbContext : IdentityDbContext<UserEntity, IdentityRoleEntity, Guid>
 {
     public RoboKpDbContext(DbContextOptions<RoboKpDbContext> options) : base(options)
-    { }
+    {
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<UserEntity>()
             .HasIndex(u => u.Email)
             .IsUnique();
     }
-    
-    public DbSet<UserEntity> Users { get; set; }
 }

@@ -1,5 +1,4 @@
-using System.Net.NetworkInformation;
-using Gamma.RoboKP.Domain.Entites;
+using Gamma.RoboKP.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

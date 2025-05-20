@@ -1,12 +1,17 @@
+using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
 using Gamma.RoboKP.Application.Abstractions.Repositories;
-using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Services;
-using Gamma.RoboKP.Infrastructure;
+using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Models;
+using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Infrastructure.Context;
 using Gamma.RoboKP.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Gamma.RoboKP.Extensions;
@@ -62,10 +67,61 @@ public static class ServiceCollectionsExtensions
     
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IUserService, UserService>();
+        //builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         
-        builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddBearerAuthentication(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddAuthentication(x => // cтандартный метод
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; // аутентификация 
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // авторизация
+            })
+            .AddJwtBearer(x => // добавляем эту схему
+            
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = // для валидации токена
+                        new SymmetricSecurityKey(
+                            Encoding.ASCII.GetBytes(builder.Configuration["Authentication:TokenPrivateKey"]!)),
+                    ValidIssuer = "test",
+                    ValidAudience = "test",
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false
+                };
+            });
+        builder.Services.AddAuthorization(options => // роли
+        {
+            options.AddPolicy("Admin", policy => policy.RequireRole(RoleConsts.AdminGamma));
+            //options.AddPolicy("ManagerGamma", policy => policy.RequireRole("managerGamma"));
+            //options.AddPolicy("ManagerPartner", policy => policy.RequireRole("managerPartner"));
+        });
+        builder.Services.AddTransient<IAuthService, AuthService>();
+        builder.Services.AddDefaultIdentity<UserEntity>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+            })
+            .AddEntityFrameworkStores<RoboKpDbContext>()
+            .AddUserManager<UserManager<UserEntity>>()
+            .AddUserStore<UserStore<UserEntity, IdentityRoleEntity, RoboKpDbContext, Guid>>();
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddOptions(this WebApplicationBuilder builder)
+    {
+        builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Authentication"));
+        
         return builder;
     }
 

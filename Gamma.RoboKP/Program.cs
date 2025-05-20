@@ -9,6 +9,8 @@ builder.Services.AddControllers();
 builder.Services.RegisterMapster();
 
 builder
+    .AddBearerAuthentication()
+    .AddOptions()
     .AddData()
     .AddSwagger()
     .AddApplicationServices();
