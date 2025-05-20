@@ -1,6 +1,6 @@
 using Mapster;
 
-namespace Gamma.RoboKP.Domain.MapperRegister;
+namespace Gamma.RoboKP.Application.MapperRegister;
 
 public class RequestModelsRegister : IRegister
 {

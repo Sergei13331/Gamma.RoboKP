@@ -1,10 +1,10 @@
 using System.Reflection;
-using Gamma.RoboKP.Domain.MapperRegister;
+using Gamma.RoboKP.Application.MapperRegister;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Gamma.RoboKP.Domain.Extensions;
+namespace Gamma.RoboKP.Application.Extensions;
 
 public static class MapperExtensions
 {

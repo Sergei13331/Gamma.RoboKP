@@ -16,7 +16,7 @@ using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
 public class AuthService(IOptions<AuthOptions> authOptions,
-    UserManager<UserEntity> userManager, IMapper mapper) : IAuthService
+    UserManager<UserEntity> userManager) : IAuthService
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
@@ -50,7 +50,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         {
             var user = await userManager.FindByEmailAsync(userRegisterDto.Email);
             
-            var result = await userManager.AddToRoleAsync(user, RoleConsts.AdminGamma);
+            var result = await userManager.AddToRoleAsync(user, RoleConsts.AdminGamma); // изменить на 
             if (result.Succeeded)
             {
                 var response = new UserResponse
@@ -78,6 +78,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
     public async Task<UserResponse> Login(UserLoginDto userLoginDto)
     {
         var user = await userManager.FindByEmailAsync(userLoginDto.Email);
+        
         if (user == null)
         {
             throw new EntityNotFoundException($"Пользователь с почтой {userLoginDto.Email} не найден");

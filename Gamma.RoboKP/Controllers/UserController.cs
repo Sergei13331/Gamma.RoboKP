@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gamma.RoboKP.Controllers;
 [ApiController]
 [Route("api/user")]
-public class UserController(IAuthService authService) : ControllerBase
+public class UserController(IAuthService authService, IUserService userService) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
@@ -21,10 +21,15 @@ public class UserController(IAuthService authService) : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpGet("role")]
     [Authorize]
-    public async Task<ActionResult> Get()
+    public async Task<ActionResult<string>> GetUserRole([FromQuery] string email)
     {
-        return Ok();
+        var result = await userService.GetUserRole(email);
+        if (result is null)
+        {
+            return NotFound($"Пользователь с почтой {email} не найден");
+        }
+        return Ok(result);
     }
 }

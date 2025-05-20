@@ -1,4 +1,4 @@
-using Gamma.RoboKP.Domain.Extensions;
+using Gamma.RoboKP.Application.Extensions;
 using Gamma.RoboKP.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

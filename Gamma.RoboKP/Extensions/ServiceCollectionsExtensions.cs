@@ -65,6 +65,7 @@ public static class ServiceCollectionsExtensions
     
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
+        builder.Services.AddScoped<IUserService, UserService>();
         return builder;
     }
 
