@@ -81,7 +81,11 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         
         if (user == null)
         {
-            throw new EntityNotFoundException($"Пользователь с почтой {userLoginDto.Email} не найден");
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                  Description  = $"Пользователь с почтой {userLoginDto.Email} не найден",
+                  Code = "Email not found" } });
         }
         var checkPasswordResult = await userManager.CheckPasswordAsync(user, userLoginDto.Password);
         
@@ -104,7 +108,11 @@ public class AuthService(IOptions<AuthOptions> authOptions,
             return GenerateToken(userResponse);
         }
 
-        throw new AuthenticationException("Неверный пароль");
+        throw new PasswordFailedException(
+            new List<IdentityError>{new IdentityError()
+            {
+                Description = "Неверный пароль",
+                Code = "Invalid Password"} });
     }
     
     public UserResponse GenerateToken(UserResponse userRegisterModel)
