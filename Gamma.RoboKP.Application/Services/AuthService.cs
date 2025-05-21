@@ -50,7 +50,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         {
             var user = await userManager.FindByEmailAsync(userRegisterDto.Email);
             
-            var result = await userManager.AddToRoleAsync(user, RoleConsts.AdminGamma); // изменить на 
+            var result = await userManager.AddToRoleAsync(user, RoleConsts.ManagerPartner); // изменить на 
             if (result.Succeeded)
             {
                 var response = new UserResponse
@@ -59,7 +59,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                     FirstName = user.FirstName,
                     SurName = user.Surname,
                     LastName = user.LastName,
-                    Role = RoleConsts.AdminGamma,
+                    Role = RoleConsts.ManagerPartner,
                     Status = user.Status,
                     Email = user.Email,
                     Company = user.Company,

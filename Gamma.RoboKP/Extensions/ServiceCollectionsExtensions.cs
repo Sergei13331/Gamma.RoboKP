@@ -98,8 +98,8 @@ public static class ServiceCollectionsExtensions
         builder.Services.AddAuthorization(options => // роли
         {
             options.AddPolicy("Admin", policy => policy.RequireRole(RoleConsts.AdminGamma));
-            //options.AddPolicy("ManagerGamma", policy => policy.RequireRole("managerGamma"));
-            //options.AddPolicy("ManagerPartner", policy => policy.RequireRole("managerPartner"));
+            options.AddPolicy("ManagerGamma", policy => policy.RequireRole(RoleConsts.ManagerGamma));
+            options.AddPolicy("ManagerPartner", policy => policy.RequireRole(RoleConsts.ManagerPartner));
         });
         builder.Services.AddTransient<IAuthService, AuthService>();
         builder.Services.AddDefaultIdentity<UserEntity>(options =>
