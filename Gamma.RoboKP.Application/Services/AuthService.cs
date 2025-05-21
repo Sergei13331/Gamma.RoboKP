@@ -1,5 +1,4 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
@@ -8,7 +7,6 @@ using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
-using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -35,7 +33,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         
         var existingUser = await userManager.FindByEmailAsync(entity.Email);
         
-        if (existingUser != null)
+        if (existingUser != null) 
         {
             throw new NotValidUserException(
                 entity,
@@ -50,11 +48,11 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         {
             var user = await userManager.FindByEmailAsync(userRegisterDto.Email);
             
-            var result = await userManager.AddToRoleAsync(user, RoleConsts.ManagerPartner); // изменить на 
+            var result = await userManager.AddToRoleAsync(user, RoleConsts.ManagerPartner); 
             if (result.Succeeded)
             {
                 var response = new UserResponse
-                {
+                {      
                     Id = user.Id,
                     FirstName = user.FirstName,
                     SurName = user.Surname,
@@ -114,7 +112,12 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Description = "Неверный пароль",
                 Code = "Invalid Password"} });
     }
-    
+
+    public Task<UserResponse> LogOut()
+    {
+        throw new NotImplementedException();
+    }
+
     public UserResponse GenerateToken(UserResponse userRegisterModel)
     {
         var handler = new JwtSecurityTokenHandler();
@@ -128,7 +131,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
             {ClaimTypes.Name, userRegisterModel.Email!},
             {ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString()},
             {JwtRegisteredClaimNames.Aud, "test"},
-            {JwtRegisteredClaimNames.Iss, "test"}
+            {JwtRegisteredClaimNames.Iss, "test1"}
         };
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -152,7 +155,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         claims.AddClaim(new Claim(ClaimTypes.Name, userRegisterModel.Email));
         claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString()));
         claims.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, "test"));
-        claims.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, "test"));
+        claims.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, "test1"));
         claims.AddClaim(new Claim(ClaimTypes.Role, userRegisterModel.Role.ToString()));
 
         return claims;

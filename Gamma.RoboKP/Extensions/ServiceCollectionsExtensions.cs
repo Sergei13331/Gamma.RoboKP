@@ -89,10 +89,23 @@ public static class ServiceCollectionsExtensions
                             Encoding.ASCII.GetBytes(builder.Configuration["Authentication:TokenPrivateKey"]!)),
                     ValidIssuer = "test",
                     ValidAudience = "test",
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = false,
-                    ValidateIssuerSigningKey = false
+                    ValidateIssuerSigningKey = true
+                };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var tokenFromCookie = context.HttpContext.Request.Cookies["access_token"];
+                        
+                        if (!string.IsNullOrEmpty(tokenFromCookie))
+                        {
+                            context.Token = tokenFromCookie;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
         builder.Services.AddAuthorization(options => // роли
@@ -110,7 +123,8 @@ public static class ServiceCollectionsExtensions
             })
             .AddEntityFrameworkStores<RoboKpDbContext>()
             .AddUserManager<UserManager<UserEntity>>()
-            .AddUserStore<UserStore<UserEntity, IdentityRoleEntity, RoboKpDbContext, Guid>>();
+            .AddUserStore<UserStore<UserEntity, IdentityRoleEntity, RoboKpDbContext, long>>();
+        
         return builder;
     }
 

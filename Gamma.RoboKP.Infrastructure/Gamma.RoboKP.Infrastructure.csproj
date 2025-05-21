@@ -27,8 +27,4 @@
       <ProjectReference Include="..\Gamma.RoboKP.Domain\Gamma.RoboKP.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Repositories\" />
-    </ItemGroup>
-
 </Project>

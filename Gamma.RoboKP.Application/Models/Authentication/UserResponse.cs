@@ -3,7 +3,7 @@ using Gamma.RoboKP.Domain.Enums;
 namespace Gamma.RoboKP.Application.Models.Authentication;
 
 public class UserResponse{
-    public Guid Id { get; set; }
+    public long Id { get; set; }
     public string FirstName { get; set; }
     public string SurName { get; set; }
     public string LastName { get; set; }

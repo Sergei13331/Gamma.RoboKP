@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gamma.RoboKP.Domain.Entities;
 
-public class UserEntity : IdentityUser<Guid>
+public class UserEntity : IdentityUser<long>
 {
     // public UserEntity(Guid id,
     //     string firstName,
