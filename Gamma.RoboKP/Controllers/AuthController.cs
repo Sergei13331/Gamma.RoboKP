@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Gamma.RoboKP.Application.Abstractions.Auth;
+using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Models.Authentication;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +12,7 @@ namespace Gamma.RoboKP.Controllers;
 [ApiController]
 [Route("api/auth")]
 public class AuthController(IOptions<AuthOptions> authOptions,
-    IAuthService authService) : ControllerBase
+    IAuthService authService, IRefreshTokenService refreshTokenService) : ControllerBase
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
@@ -62,6 +64,35 @@ public class AuthController(IOptions<AuthOptions> authOptions,
         });
         
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies["refresh_token"];
+        await refreshTokenService.DeleteRefreshToken(refreshToken);
+        
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
+        
+        return Ok(new{message = "успешный выход из аккаунта"});
+    }
+
+    [Authorize]
+    [HttpPost("logout/all")]
+    public async Task<ActionResult> LogoutAll()
+    {
+        var userIdFromClaims = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdFromClaims == null) return Unauthorized();
+        
+        var userId = long.Parse(userIdFromClaims);
+        
+        await refreshTokenService.DeleteAllUserRefreshTokens(userId);
+        
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
+        return Ok();
     }
     
     [HttpPost("refresh")]

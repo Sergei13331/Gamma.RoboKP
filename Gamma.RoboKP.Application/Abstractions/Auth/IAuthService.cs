@@ -8,6 +8,5 @@ public interface IAuthService
     Task<UserResponse> Login(UserLoginDto userLoginDto);
     
     Task<UserResponse?> RefreshAccessToken(string refreshToken);
-    Task<UserResponse> LogOut();
     
 }

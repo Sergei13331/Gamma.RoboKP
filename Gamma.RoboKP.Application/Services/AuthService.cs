@@ -1,10 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
 using Gamma.RoboKP.Application.Abstractions.Repositories;
 using Gamma.RoboKP.Application.Abstractions.Services;
-using Gamma.RoboKP.Application.Extensions;
 using Gamma.RoboKP.Application.Models.Authentication;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Exceptions;
@@ -12,7 +8,6 @@ using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
@@ -159,10 +154,5 @@ public class AuthService(IOptions<AuthOptions> authOptions,
         };
         userResponse.Token = tokenService.GenerateAccessToken(userResponse);
         return userResponse;
-    }
-
-    public Task<UserResponse> LogOut()
-    {
-        throw new NotImplementedException();
     }
 }

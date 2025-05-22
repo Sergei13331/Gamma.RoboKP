@@ -31,10 +31,17 @@ public class RefreshTokenService(ITokenRepository tokenRepository) : IRefreshTok
         var hash = sha256.ComputeHash(bytes);
         return Convert.ToBase64String(hash);
     }
+
+    public async Task<bool> DeleteRefreshToken(string token)
+    {
+        string hashToken = HashToken(token);
+        var result = await tokenRepository.Delete(hashToken);
+        
+        return result;
+    }
     
-    //
-    // public Task SaveRefreshToken(Guid tokenId, string token, DateTime expiresAt, long userId)
-    // {
-    //     return tokenRepository.SaveToken(tokenId, token, expiresAt, userId);
-    // }
+    public async Task<bool> DeleteAllUserRefreshTokens(long userId)
+    {
+        return await tokenRepository.DeleteAllUserTokens(userId);
+    }
 }
