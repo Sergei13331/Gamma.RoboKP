@@ -2,6 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Gamma.RoboKP.Application.Abstractions.Auth;
+using Gamma.RoboKP.Application.Abstractions.Repositories;
+using Gamma.RoboKP.Application.Abstractions.Services;
+using Gamma.RoboKP.Application.Extensions;
 using Gamma.RoboKP.Application.Models.Authentication;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Exceptions;
@@ -14,7 +17,10 @@ using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
 public class AuthService(IOptions<AuthOptions> authOptions,
-    UserManager<UserEntity> userManager) : IAuthService
+    UserManager<UserEntity> userManager,
+    ITokenRepository refreshTokenRepository,
+    IRefreshTokenService refreshTokenService,
+    ITokenService tokenService) : IAuthService
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
@@ -63,7 +69,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                     Company = user.Company,
                     UserName = user.UserName,
                 }; 
-                return GenerateToken(response);
+                return tokenService.GenerateToken(response);
             }
 
             throw new Exception($"Errors: {string.Join(";", result.Errors
@@ -103,7 +109,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Company = user.Company,
                 UserName = user.UserName,
             };
-            return GenerateToken(userResponse);
+            return tokenService.GenerateToken(userResponse);
         }
 
         throw new PasswordFailedException(
@@ -113,51 +119,13 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Code = "Invalid Password"} });
     }
 
-    public Task<UserResponse> LogOut()
+    public Task<UserResponse?> RefreshAccessToken(long userId, string refreshToken)
     {
         throw new NotImplementedException();
     }
 
-    public UserResponse GenerateToken(UserResponse userRegisterModel)
+    public Task<UserResponse> LogOut()
     {
-        var handler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_authOptions.TokenPrivateKey);
-        var credentials = new SigningCredentials(
-            new SymmetricSecurityKey(key),
-            SecurityAlgorithms.HmacSha256Signature);
-        
-        var claims = new Dictionary<string, object>
-        {
-            {ClaimTypes.Name, userRegisterModel.Email!},
-            {ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString()},
-            {JwtRegisteredClaimNames.Aud, "test"},
-            {JwtRegisteredClaimNames.Iss, "test1"}
-        };
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = GenerateClaims(userRegisterModel),
-            Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
-            SigningCredentials = credentials,
-            Claims = claims,
-            Audience = "test",
-            Issuer = "test"
-        };
-
-        var token = handler.CreateToken(tokenDescriptor);
-        userRegisterModel.Token = handler.WriteToken(token);
-
-        return userRegisterModel;
-    }
-
-    private static ClaimsIdentity GenerateClaims(UserResponse userRegisterModel)
-    {
-        var claims = new ClaimsIdentity();
-        claims.AddClaim(new Claim(ClaimTypes.Name, userRegisterModel.Email));
-        claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString()));
-        claims.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, "test"));
-        claims.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, "test1"));
-        claims.AddClaim(new Claim(ClaimTypes.Role, userRegisterModel.Role.ToString()));
-
-        return claims;
+        throw new NotImplementedException();
     }
 }

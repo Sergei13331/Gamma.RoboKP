@@ -6,6 +6,8 @@ public interface IAuthService
 {
     Task<UserResponse> Register(UserRegisterDto userRegisterDto);
     Task<UserResponse> Login(UserLoginDto userLoginDto);
+    
+    Task<UserResponse?> RefreshAccessToken(long userId ,string refreshToken);
     Task<UserResponse> LogOut();
     
 }

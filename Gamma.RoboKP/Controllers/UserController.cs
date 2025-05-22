@@ -20,12 +20,20 @@ public class UserController(IOptions<AuthOptions> authOptions, IAuthService auth
     {
         var result =  await authService.Register(userRegisterDto);
         
-        Response.Cookies.Append("token", result.Token, new CookieOptions
+        Response.Cookies.Append("access_token", result.Token, new CookieOptions
         {
-            HttpOnly = false,
-            Secure = false,
+            HttpOnly = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+        });
+        
+        Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays),
         });
         
         return Ok(result);
@@ -43,6 +51,14 @@ public class UserController(IOptions<AuthOptions> authOptions, IAuthService auth
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+        });
+        
+        Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays),
         });
         
         return Ok(result);

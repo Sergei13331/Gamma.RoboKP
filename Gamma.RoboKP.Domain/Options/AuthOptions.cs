@@ -4,4 +4,5 @@ public class AuthOptions
 {
     public required string TokenPrivateKey { get; set; }
     public int ExpireMinutes { get; set; }
+    public int RefreshTokenExpireDays { get; set; }
 }

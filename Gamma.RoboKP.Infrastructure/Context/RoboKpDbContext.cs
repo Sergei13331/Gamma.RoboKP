@@ -6,7 +6,7 @@ namespace Gamma.RoboKP.Infrastructure.Context;
 
 public class RoboKpDbContext : IdentityDbContext<UserEntity, IdentityRoleEntity, long>
 {
-    public DbSet<RefreshTokenEntity> RefreshToken { get; set; }
+    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     public RoboKpDbContext(DbContextOptions<RoboKpDbContext> options) : base(options)
     {
     }
