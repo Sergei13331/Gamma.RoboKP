@@ -1,9 +1,13 @@
-using Gamma.RoboKP.Domain.Entities;
-
-namespace Gamma.RoboKP.Application.Abstractions.Repositories;
-
-public interface IUserRepository
-{
-    Task<Guid> Add(UserEntity user);
-    Task<UserEntity> GetByEmail(string email);
-}
+// using Gamma.RoboKP.Domain.Entities;
+// using Gamma.RoboKP.Domain.Enums;
+//
+// namespace Gamma.RoboKP.Application.Abstractions.Repositories;
+//
+// public interface IUserRepository
+// {
+//     Task<List<UserEntity>> GetAll();
+//     Task<UserEntity?> GetById(long id);
+//     Task<UserEntity?> GetByEmail(string email);
+//     Task<UserEntity> Update(UserEntity user);
+//     Task<bool> Delete(long id);
+// }
