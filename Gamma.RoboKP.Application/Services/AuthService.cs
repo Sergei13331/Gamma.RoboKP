@@ -69,7 +69,11 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                     Company = user.Company,
                     UserName = user.UserName,
                 }; 
-                return tokenService.GenerateToken(response);
+                
+                response.Token = tokenService.GenerateAccessToken(response);
+                response.RefreshToken = await tokenService.GenerateRefreshToken(user.Id);
+                
+                return response;
             }
 
             throw new Exception($"Errors: {string.Join(";", result.Errors
@@ -109,7 +113,10 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Company = user.Company,
                 UserName = user.UserName,
             };
-            return tokenService.GenerateToken(userResponse);
+            userResponse.Token = tokenService.GenerateAccessToken(userResponse);
+            userResponse.RefreshToken = await tokenService.GenerateRefreshToken(user.Id);
+                
+            return userResponse;
         }
 
         throw new PasswordFailedException(
@@ -119,9 +126,39 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Code = "Invalid Password"} });
     }
 
-    public Task<UserResponse?> RefreshAccessToken(long userId, string refreshToken)
+    public async Task<UserResponse?> RefreshAccessToken(string refreshToken)
     {
-        throw new NotImplementedException();
+        var hashToken = refreshTokenService.HashToken(refreshToken);
+        
+        var refreshTokenEntity = await refreshTokenRepository.GetByHashToken(hashToken);
+
+        if (refreshTokenEntity == null || refreshTokenEntity.ExpiresAt < DateTime.Now)
+        {
+            return null;
+        }
+        
+        var user = await userManager.FindByIdAsync(refreshTokenEntity.UserId.ToString());
+        if (user == null)
+        {
+            return null;
+        }
+        
+        var userRole = await userManager.GetRolesAsync(user);
+
+        var userResponse = new UserResponse
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            SurName = user.Surname,
+            LastName = user.LastName,
+            Role = userRole.FirstOrDefault()!,
+            Status = user.Status,
+            Email = user.Email,
+            Company = user.Company,
+            UserName = user.UserName,
+        };
+        userResponse.Token = tokenService.GenerateAccessToken(userResponse);
+        return userResponse;
     }
 
     public Task<UserResponse> LogOut()

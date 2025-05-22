@@ -17,42 +17,54 @@ public class TokenService(IRefreshTokenService refreshTokenService,
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
-    public UserResponse GenerateToken(UserResponse userRegisterModel)
+    public async Task<string> GenerateRefreshToken(long userId)
     {
-        var handler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_authOptions.TokenPrivateKey);
-        var credentials = new SigningCredentials(
-            new SymmetricSecurityKey(key),
-            SecurityAlgorithms.HmacSha256Signature);
-        
-        var claims = new Dictionary<string, object>
-        {
-            {ClaimTypes.Name, userRegisterModel.Email!},
-            {ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString()},
-            {JwtRegisteredClaimNames.Aud, "test"},
-            {JwtRegisteredClaimNames.Iss, "test1"}
-        };
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = GenerateClaims(userRegisterModel),
-            Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
-            SigningCredentials = credentials,
-            Claims = claims,
-            Audience = "test",
-            Issuer = "test"
-        };
-    
-        var token = handler.CreateToken(tokenDescriptor);
-        userRegisterModel.Token = handler.WriteToken(token);
-        
         var refreshToken = refreshTokenService.GenerateRefreshToken();
-        var hashToken = refreshTokenService.HashToken(refreshToken);
-        var refreshTokenExpire = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays);
-        userRegisterModel.RefreshToken = refreshToken;
+        var hashed = refreshTokenService.HashToken(refreshToken);
+        var expiresAt = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays);
+
+        await tokenRepository.SaveToken(Guid.NewGuid(), hashed, expiresAt, userId);
+        return refreshToken;  
+    }
+    
+    public string GenerateAccessToken(UserResponse userRegisterModel)
+    {
         
-        tokenRepository.SaveToken(Guid.NewGuid(), hashToken, refreshTokenExpire, userRegisterModel.Id).GetAwaiter().GetResult();
-        
-        return userRegisterModel;
+            var handler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_authOptions.TokenPrivateKey);
+            var credentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature);
+
+            var claims = new Dictionary<string, object>
+            {
+                { ClaimTypes.Name, userRegisterModel.Email! },
+                { ClaimTypes.NameIdentifier, userRegisterModel.Id.ToString() },
+                { JwtRegisteredClaimNames.Aud, "test" },
+                { JwtRegisteredClaimNames.Iss, "test1" }
+            };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = GenerateClaims(userRegisterModel),
+                Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+                SigningCredentials = credentials,
+                Claims = claims,
+                Audience = "test",
+                Issuer = "test"
+            };
+
+            var token = handler.CreateToken(tokenDescriptor);
+            // userRegisterModel.Token = handler.WriteToken(token);
+            //
+            // var refreshToken = refreshTokenService.GenerateRefreshToken();
+            // var hashToken = refreshTokenService.HashToken(refreshToken);
+            // var refreshTokenExpire = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays);
+            // userRegisterModel.RefreshToken = refreshToken;
+            //
+            // tokenRepository.SaveToken(Guid.NewGuid(), hashToken, refreshTokenExpire, userRegisterModel.Id).GetAwaiter()
+            //     .GetResult();
+            //
+            return handler.WriteToken(token);
     }
     
     public ClaimsIdentity GenerateClaims(UserResponse userRegisterModel)

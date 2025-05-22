@@ -22,11 +22,8 @@ public class TokenRepository(RoboKpDbContext context) : ITokenRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<RefreshTokenEntity?> GetByUserId(long tokenId)
+    public async Task<RefreshTokenEntity?> GetByHashToken(string tokenHash)
     {
-        return await context.RefreshTokens
-            .Where(t => t.UserId == tokenId)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync();
+        return await context.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
     }
 }

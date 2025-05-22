@@ -1,6 +1,5 @@
 using Gamma.RoboKP.Application.Abstractions.Auth;
 using Gamma.RoboKP.Application.Models.Authentication;
-using Gamma.RoboKP.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
@@ -61,6 +60,28 @@ public class UserController(IOptions<AuthOptions> authOptions, IAuthService auth
             Expires = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays),
         });
         
+        return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> RefreshToken()
+    {
+        var refreshToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
+        
+        var result = await authService.RefreshAccessToken(refreshToken);
+        if (result is null)
+        {
+            return NotFound();
+        }
+        Response.Cookies.Append("access_token", result.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+        });
         return Ok(result);
     }
 

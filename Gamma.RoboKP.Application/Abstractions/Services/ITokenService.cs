@@ -5,6 +5,7 @@ namespace Gamma.RoboKP.Application.Abstractions.Services;
 
 public interface ITokenService
 {
-    UserResponse GenerateToken(UserResponse userRegisterModel);
+    string GenerateAccessToken(UserResponse userRegisterModel);
+    Task<string> GenerateRefreshToken(long userId);
     ClaimsIdentity GenerateClaims(UserResponse userRegisterModel);
 }

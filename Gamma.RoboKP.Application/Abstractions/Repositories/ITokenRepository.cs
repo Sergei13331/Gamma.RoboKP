@@ -6,5 +6,5 @@ namespace Gamma.RoboKP.Application.Abstractions.Repositories;
 public interface ITokenRepository
 {
     Task SaveToken(Guid tokenId, string token, DateTime expiresAt , long userId);
-    Task<RefreshTokenEntity?> GetByUserId(long tokenId);
+    Task<RefreshTokenEntity?> GetByHashToken(string tokenHash);
 }
