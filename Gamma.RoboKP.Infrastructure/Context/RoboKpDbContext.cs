@@ -18,5 +18,9 @@ public class RoboKpDbContext : IdentityDbContext<UserEntity, IdentityRoleEntity,
         modelBuilder.Entity<UserEntity>()
             .HasIndex(u => u.Email)
             .IsUnique();
+        
+            modelBuilder.Entity<UserEntity>()
+                .Property(u => u.Status)
+                .HasConversion<string>();
     }
 }

@@ -3,6 +3,7 @@ using Gamma.RoboKP.Application.Abstractions.Repositories;
 using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Models.Authentication;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
@@ -26,7 +27,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
             FirstName = userRegisterDto.Name,
             Surname = userRegisterDto.Surname,
             LastName = userRegisterDto.LastName,
-            Status = userRegisterDto.Status,
+            Status = UserStatus.Silver, // изначально при регистации минимальная скидка
             Email = userRegisterDto.Email,
             Company = userRegisterDto.Company,
             UserName = userRegisterDto.Email,
@@ -59,7 +60,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                     SurName = user.Surname,
                     LastName = user.LastName,
                     Role = RoleConsts.ManagerPartner,
-                    Status = user.Status,
+                    Status = user.Status.ToString(),
                     Email = user.Email,
                     Company = user.Company,
                     UserName = user.UserName,
@@ -103,7 +104,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 SurName = user.Surname,
                 LastName = user.LastName,
                 Role = userRole.FirstOrDefault()!,
-                Status = user.Status,
+                Status = user.Status.ToString(),
                 Email = user.Email,
                 Company = user.Company,
                 UserName = user.UserName,
@@ -147,7 +148,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
             SurName = user.Surname,
             LastName = user.LastName,
             Role = userRole.FirstOrDefault()!,
-            Status = user.Status,
+            Status = user.Status.ToString(),
             Email = user.Email,
             Company = user.Company,
             UserName = user.UserName,

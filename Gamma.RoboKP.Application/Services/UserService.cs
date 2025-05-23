@@ -1,6 +1,7 @@
 using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Models.User;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +44,64 @@ public class UserService(UserManager<UserEntity> userManager) : IUserService
             var errors = string.Join("; ", isSuccessful.Errors.Select(e => $"{e.Code}: {e.Description}"));
             throw new Exception($"Ошибка при добавлении роли: {errors}");
         }
+    }
+    
+    public async Task<bool> SetStatus(long id, string status)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = $"Пользователь с id {id} не найден",
+                    Code = "User not found" } });
+        }
+        
+        if (!Enum.TryParse<UserStatus>(status, ignoreCase: true, out var parsedStatus))
+        {
+            throw new ArgumentException($"Недопустимый статус: {status}", nameof(status));
+        }
+        
+        user.Status = parsedStatus;
+        
+        var result = await userManager.UpdateAsync(user);
+        
+        return result.Succeeded;
+        
+    }
+    
+    public async Task<string> GetUserStatus(long id)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+        
+        if (user == null)
+        {
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = $"Пользователь с id {id} не найден",
+                    Code = "User not found" } });
+        }
+        return user.Status.ToString();
+    }
+
+    public async Task UpdateUser(long id, UserToUpdate userToUpdate)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user == null) 
+        {
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = $"Пользователь с id {id} не найден",
+                    Code = "User not found" } });
+        }
+        
+        //if(userToUpdate.Email != )
+        
+        // дореализовать
     }
 
     public async Task<List<UserToGetAll>> GetAllUsers()

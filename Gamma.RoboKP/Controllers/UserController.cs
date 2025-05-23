@@ -10,7 +10,7 @@ public class UserController(IUserService userService) : ControllerBase
 {
     
     [HttpGet("role/{id}")]
-    [Authorize]
+    [Authorize(Roles = "admingamma")]
     public async Task<ActionResult<string>> GetUserRole([FromRoute] long id)
     {
         var result = await userService.GetUserRole(id);
@@ -34,6 +34,22 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<ActionResult<bool>> SetRole([FromRoute] long id, [FromHeader] string role)
     {
         await userService.SetUserRole(id, role);
+        return Ok();
+    }
+    
+    [Authorize(Roles = "admingamma")]
+    [HttpGet("status/{id}")]
+    public async Task<ActionResult<string>> GetStatus([FromRoute] long id)
+    {
+        var result = await userService.GetUserStatus(id);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "admingamma")]
+    [HttpPut("setStatus/{id}")]
+    public async Task<ActionResult<bool>> SetStatus([FromRoute] long id, [FromHeader] string status)
+    {
+        await userService.SetStatus(id, status);
         return Ok();
     }
 }

@@ -3,7 +3,6 @@ using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Gamma.RoboKP.Infrastructure.Repositories;
 
 public class TokenRepository(RoboKpDbContext context) : ITokenRepository

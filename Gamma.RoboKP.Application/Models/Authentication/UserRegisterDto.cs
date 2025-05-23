@@ -6,7 +6,6 @@ public record UserRegisterDto(
     string Name,
     string Surname,
     string LastName,
-    UserStatus Status,
     string Email,
     string Password,
     string Company

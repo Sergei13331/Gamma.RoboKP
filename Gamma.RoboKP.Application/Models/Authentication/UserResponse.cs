@@ -8,7 +8,7 @@ public class UserResponse{
     public string SurName { get; set; }
     public string LastName { get; set; }
     public string Role { get; set; }
-    public UserStatus Status { get; set; }
+    public string Status { get; set; }
     public string Email {get; set;}
     
     public string Company { get; set; }
