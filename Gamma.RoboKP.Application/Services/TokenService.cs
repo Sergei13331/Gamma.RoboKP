@@ -29,7 +29,6 @@ public class TokenService(IRefreshTokenService refreshTokenService,
     
     public string GenerateAccessToken(UserResponse userRegisterModel)
     {
-        
             var handler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_authOptions.TokenPrivateKey);
             var credentials = new SigningCredentials(
@@ -54,16 +53,7 @@ public class TokenService(IRefreshTokenService refreshTokenService,
             };
 
             var token = handler.CreateToken(tokenDescriptor);
-            // userRegisterModel.Token = handler.WriteToken(token);
-            //
-            // var refreshToken = refreshTokenService.GenerateRefreshToken();
-            // var hashToken = refreshTokenService.HashToken(refreshToken);
-            // var refreshTokenExpire = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays);
-            // userRegisterModel.RefreshToken = refreshToken;
-            //
-            // tokenRepository.SaveToken(Guid.NewGuid(), hashToken, refreshTokenExpire, userRegisterModel.Id).GetAwaiter()
-            //     .GetResult();
-            //
+        
             return handler.WriteToken(token);
     }
     

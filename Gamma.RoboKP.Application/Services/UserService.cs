@@ -87,7 +87,7 @@ public class UserService(UserManager<UserEntity> userManager) : IUserService
         return user.Status.ToString();
     }
 
-    public async Task UpdateUser(long id, UserToUpdate userToUpdate)
+    public async Task<bool> UpdateUser(long id, UserToUpdate userToUpdate)
     {
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null) 
@@ -99,21 +99,30 @@ public class UserService(UserManager<UserEntity> userManager) : IUserService
                     Code = "User not found" } });
         }
         
-        //if(userToUpdate.Email != )
+        if (userToUpdate.FirstName != null) user.FirstName = userToUpdate.FirstName;
         
-        // дореализовать
+        if(userToUpdate.SurName != null) user.Surname = userToUpdate.SurName;
+        
+        if(userToUpdate.LastName != null) user.LastName = userToUpdate.LastName;
+        
+        if (userToUpdate.Email != null) user.Email = userToUpdate.Email;
+        if(userToUpdate.UserName != null) user.UserName = userToUpdate.UserName;
+        
+        var result = await userManager.UpdateAsync(user);
+        
+        return result.Succeeded;
     }
 
-    public async Task<List<UserToGetAll>> GetAllUsers()
+    public async Task<List<UserToGet>> GetAllUsers()
     {
         var usersEntity = await userManager.Users.ToListAsync();
 
-        var usersWithRoles = new List<UserToGetAll>();
+        var usersWithRoles = new List<UserToGet>();
 
         foreach (var user in usersEntity)
         {
             var roles = await userManager.GetRolesAsync(user);
-            usersWithRoles.Add(new UserToGetAll
+            usersWithRoles.Add(new UserToGet
             (
                 user.Id,
                 user.FirstName,
@@ -128,4 +137,40 @@ public class UserService(UserManager<UserEntity> userManager) : IUserService
 
         return usersWithRoles;
     }
+
+    public async Task<bool> DeleteUser(long id)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user == null) return false;
+        
+        var result = await userManager.DeleteAsync(user);
+        
+        return result.Succeeded;
+    }
+
+    public async Task<UserToGet> GetUserById(long id)
+    {
+        var userEntity = await userManager.FindByIdAsync(id.ToString());
+        if (userEntity == null)
+        {
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = $"Пользователь c id {id} не найден",
+                    Code = "User not found" } });
+        }
+        var roles = await userManager.GetRolesAsync(userEntity);
+        var user = new UserToGet(
+
+            userEntity.Id,
+            userEntity.FirstName,
+            userEntity.Surname,
+            userEntity.LastName,
+            userEntity.Email,
+            userEntity.Status,
+            roles.FirstOrDefault(),
+            userEntity.Company
+        );
+        return user;
+    } 
 }

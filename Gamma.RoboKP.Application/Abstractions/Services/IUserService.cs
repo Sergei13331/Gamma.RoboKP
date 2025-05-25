@@ -6,8 +6,10 @@ public interface IUserService
 {
     Task<string?> GetUserRole(long id);
     Task SetUserRole(long id, string role);
-    Task<List<UserToGetAll>> GetAllUsers();
+    Task<List<UserToGet>> GetAllUsers();
     Task<bool> SetStatus(long id, string status);
     Task<string> GetUserStatus(long id);
-    Task UpdateUser(long id, UserToUpdate userToUpdate);
+    Task<bool> UpdateUser(long id, UserToUpdate userToUpdate);
+    Task<bool> DeleteUser(long id);
+    Task<UserToGet> GetUserById(long id);
 }

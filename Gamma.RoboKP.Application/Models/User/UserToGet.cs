@@ -2,7 +2,7 @@ using Gamma.RoboKP.Domain.Enums;
 
 namespace Gamma.RoboKP.Application.Models.User;
 
-public record UserToGetAll(
+public record UserToGet(
     long Id,
     string Name,
     string SurName,
