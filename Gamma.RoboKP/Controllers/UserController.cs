@@ -23,6 +23,15 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("email/{email}")]
+    public async Task<ActionResult<UserToGet>> GetUserByEmail([FromRoute] string email)
+    {
+        var response = await userService.GetUserByEmail(email);
+        
+        if (response is null) return NotFound();
+        return Ok(response);
+    }
+
     [Authorize(Roles = "admingamma")]
     [HttpGet("{id}")]
     public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id)
@@ -39,7 +48,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(users);
     }
     
-    [Authorize(Roles = "admingamma")]// как сonst
+    [Authorize(Roles = "admingamma")] //TODO: admingamma как сonst
     [HttpPatch("{id}/role")]
     public async Task<ActionResult<bool>> SetRole([FromRoute] long id, [FromHeader] string role)
     {

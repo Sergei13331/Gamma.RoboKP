@@ -1,4 +1,5 @@
 using Gamma.RoboKP.Domain.Enums;
+using Gamma.RoboKP.Domain.ValueObject;
 
 namespace Gamma.RoboKP.Application.Models.Authentication;
 
@@ -11,7 +12,7 @@ public class UserResponse{
     public string Status { get; set; }
     public string Email {get; set;}
     
-    public string Company { get; set; }
+    public Company Company { get; set; }
     public string UserName { get; set; }
     public string Token {get; set;}
     public string RefreshToken {get; set;}

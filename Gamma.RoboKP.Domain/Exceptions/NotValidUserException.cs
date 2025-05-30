@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gamma.RoboKP.Domain.Exceptions;
 
-public class NotValidUserException(UserEntity user, IEnumerable<IdentityError> errors) : Exception
+public class NotValidUserException(User user, IEnumerable<IdentityError> errors) : Exception
 {
-    public UserEntity User { get; } = user;
+    public User User { get; } = user;
     public IEnumerable<IdentityError> Errors { get; } = errors;
 }

@@ -46,7 +46,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
     {
         var result = await authService.Login(userLoginDto);
-
+    
         Response.Cookies.Append("access_token", result.Token, new CookieOptions
         {
             HttpOnly = true,
@@ -65,55 +65,55 @@ public class AuthController(IOptions<AuthOptions> authOptions,
         
         return Ok(result);
     }
-
-    [Authorize]
-    [HttpPost("logout")]
-    public async Task<ActionResult> Logout()
-    {
-        var refreshToken = Request.Cookies["refresh_token"];
-        await refreshTokenService.DeleteRefreshToken(refreshToken);
-        
-        Response.Cookies.Delete("access_token");
-        Response.Cookies.Delete("refresh_token");
-        
-        return Ok(new{message = "успешный выход из аккаунта"});
-    }
-
-    [Authorize]
-    [HttpPost("logout/all")]
-    public async Task<ActionResult> LogoutAll()
-    {
-        var userIdFromClaims = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userIdFromClaims == null) return Unauthorized();
-        
-        var userId = long.Parse(userIdFromClaims);
-        
-        await refreshTokenService.DeleteAllUserRefreshTokens(userId);
-        
-        Response.Cookies.Delete("access_token");
-        Response.Cookies.Delete("refresh_token");
-        return Ok();
-    }
-    
-    [HttpPost("refresh")]
-    [Authorize]
-    public async Task<ActionResult<UserResponse>> RefreshToken()
-    {
-        var refreshToken = Request.Cookies["refresh_token"];
-        if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
-        
-        var result = await authService.RefreshAccessToken(refreshToken);
-        if (result is null)
-        {
-            return NotFound();
-        }
-        Response.Cookies.Append("access_token", result.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
-        });
-        return Ok(result);
-    }
+    //
+    // [Authorize]
+    // [HttpPost("logout")]
+    // public async Task<ActionResult> Logout()
+    // {
+    //     var refreshToken = Request.Cookies["refresh_token"];
+    //     await refreshTokenService.DeleteRefreshToken(refreshToken);
+    //     
+    //     Response.Cookies.Delete("access_token");
+    //     Response.Cookies.Delete("refresh_token");
+    //     
+    //     return Ok(new{message = "успешный выход из аккаунта"});
+    // }
+    //
+    // [Authorize]
+    // [HttpPost("logout/all")]
+    // public async Task<ActionResult> LogoutAll()
+    // {
+    //     var userIdFromClaims = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    //     if (userIdFromClaims == null) return Unauthorized();
+    //     
+    //     var userId = long.Parse(userIdFromClaims);
+    //     
+    //     await refreshTokenService.DeleteAllUserRefreshTokens(userId);
+    //     
+    //     Response.Cookies.Delete("access_token");
+    //     Response.Cookies.Delete("refresh_token");
+    //     return Ok();
+    // }
+    //
+    // [HttpPost("refresh")]
+    // [Authorize]
+    // public async Task<ActionResult<UserResponse>> RefreshToken()
+    // {
+    //     var refreshToken = Request.Cookies["refresh_token"];
+    //     if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
+    //     
+    //     var result = await authService.RefreshAccessToken(refreshToken);
+    //     if (result is null)
+    //     {
+    //         return NotFound();
+    //     }
+    //     Response.Cookies.Append("access_token", result.Token, new CookieOptions
+    //     {
+    //         HttpOnly = true,
+    //         Secure = true,
+    //         SameSite = SameSiteMode.Strict,
+    //         Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+    //     });
+    //     return Ok(result);
+    // }
 }
