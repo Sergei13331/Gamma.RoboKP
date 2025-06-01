@@ -4,6 +4,7 @@ namespace Gamma.RoboKP.Application.Abstractions.Services;
 
 public interface IUserService
 {
+    Task<UserToGet?> GetUserByEmail(string email);
     Task<string?> GetUserRole(long id);
     Task SetUserRole(long id, string role);
     Task<List<UserToGet>> GetAllUsers();

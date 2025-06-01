@@ -8,4 +8,6 @@ public class RefreshTokenEntity
     public DateTime CreatedAt { get; set; }
     public long UserId { get; set; }
     
+    
+    //TODO: проверки на исчечение срока действия
 }

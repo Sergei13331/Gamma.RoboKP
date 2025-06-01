@@ -7,6 +7,7 @@ using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Infrastructure.Context;
+using Gamma.RoboKP.Infrastructure.Identity;
 using Gamma.RoboKP.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -69,9 +70,13 @@ public static class ServiceCollectionsExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<ITokenRepository, TokenRepository>();
         builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        
+        
         return builder;
     }
 
@@ -120,16 +125,16 @@ public static class ServiceCollectionsExtensions
             options.AddPolicy("ManagerGamma", policy => policy.RequireRole(RoleConsts.ManagerGamma));
             options.AddPolicy("ManagerPartner", policy => policy.RequireRole(RoleConsts.ManagerPartner));
         });
-        builder.Services.AddTransient<IAuthService, AuthService>();
-        builder.Services.AddDefaultIdentity<UserEntity>(options =>
+       // builder.Services.AddTransient<IAuthService, AuthService>();
+        builder.Services.AddDefaultIdentity<AppUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
             })
             .AddEntityFrameworkStores<RoboKpDbContext>()
-            .AddUserManager<UserManager<UserEntity>>()
-            .AddUserStore<UserStore<UserEntity, IdentityRoleEntity, RoboKpDbContext, long>>();
+            .AddUserManager<UserManager<AppUser>>()
+            .AddUserStore<UserStore<AppUser, IdentityRoleEntity, RoboKpDbContext, long>>();
         
         return builder;
     }
