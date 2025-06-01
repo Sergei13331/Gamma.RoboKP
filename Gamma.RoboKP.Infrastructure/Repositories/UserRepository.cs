@@ -1,9 +1,11 @@
 using Gamma.RoboKP.Application.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.ValueObject;
 using Gamma.RoboKP.Infrastructure.Identity;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gamma.RoboKP.Infrastructure.Repositories;
 
@@ -13,6 +15,16 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
     {
         var appUser = await userManager.FindByEmailAsync(email);
         
+        if (appUser == null) return null;
+        
+        var entity = mapper.Map<AppUser, User>(appUser);
+        
+        return entity;
+    }
+
+    public async Task<User?> FindByIdAsync(long id)
+    {
+        var appUser = await userManager.FindByIdAsync(id.ToString());
         if (appUser == null) return null;
         
         var entity = mapper.Map<AppUser, User>(appUser);
@@ -58,5 +70,61 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
         
         var role = await userManager.GetRolesAsync(userApp);
         return role.FirstOrDefault();
+    }
+
+    public async Task<List<User>> GetAll()
+    {
+        var usersApp = await userManager.Users.ToListAsync();
+        var user = mapper.Map<List<AppUser>, List<User>>(usersApp);
+        
+        return user;
+    }
+
+    public async Task RemoveFromRole(User user, string role)
+    {
+        var userApp = await userManager.FindByIdAsync(user.Id.ToString());
+        if (userApp == null) throw new InvalidOperationException($"User with ID {user.Id} not found");
+        
+        await userManager.RemoveFromRoleAsync(userApp, role);
+    }
+
+    public async Task<IdentityResult> UpdateAsync(User user)
+    {
+        // Получаем оригинального пользователя из базы по Id
+        var appUser = await userManager.FindByIdAsync(user.Id.ToString());
+
+        if (appUser == null)
+        {
+            throw new EntityNotFoundException(new List<IdentityError>
+            {
+                new IdentityError
+                {
+                    Description = $"Пользователь с id {user.Id} не найден",
+                    Code = "UserNotFound"
+                }
+            });
+        }
+
+        // Обновляем только нужные поля
+        appUser.Email = user.Email;
+        appUser.FirstName = user.FirstName;
+        appUser.LastName = user.LastName;
+        appUser.SurName = user.SurName;
+        appUser.Status = user.Status;
+
+        // Обновляем через Identity
+        var result = await userManager.UpdateAsync(appUser);
+        return result;
+    }
+
+
+    public async Task<IdentityResult> Delete(User user)
+    {
+        var appUser = await userManager.FindByIdAsync(user.Id.ToString());
+        if (appUser == null) throw new InvalidOperationException($"User with ID {user.Id} not found");
+        
+        var result = await userManager.DeleteAsync(appUser);
+        
+        return result;
     }
 }

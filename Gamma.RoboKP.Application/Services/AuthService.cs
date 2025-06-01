@@ -123,39 +123,44 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Description = "Неверный пароль",
                 Code = "Invalid Password"} });
     }
-    //
-    // public async Task<UserResponse?> RefreshAccessToken(string refreshToken)
-    // {
-    //     var hashToken = refreshTokenService.HashToken(refreshToken);
-    //     
-    //     var refreshTokenEntity = await refreshTokenRepository.GetByHashToken(hashToken);
-    //
-    //     if (refreshTokenEntity == null || refreshTokenEntity.ExpiresAt < DateTime.Now)
-    //     {
-    //         return null;
-    //     }
-    //     
-    //     var user = await userManager.FindByIdAsync(refreshTokenEntity.UserId.ToString());
-    //     if (user == null)
-    //     {
-    //         return null;
-    //     }
-    //     
-    //     var userRole = await userManager.GetRolesAsync(user);
-    //
-    //     var userResponse = new UserResponse
-    //     {
-    //         Id = user.Id,
-    //         FirstName = user.FirstName,
-    //         SurName = user.SurName,
-    //         LastName = user.LastName,
-    //         Role = userRole.FirstOrDefault()!,
-    //         Status = user.Status.ToString(),
-    //         Email = user.Email,
-    //        // Company = user.Company,
-    //         //UserName = user.UserName,
-    //     };
-    //     userResponse.Token = tokenService.GenerateAccessToken(userResponse);
-    //     return userResponse;
-    // }
+    
+    public async Task<UserResponse?> RefreshAccessToken(string refreshToken)
+    {
+        var hashToken = refreshTokenService.HashToken(refreshToken);
+        
+        var refreshTokenEntity = await refreshTokenRepository.GetByHashToken(hashToken);
+    
+        if (refreshTokenEntity == null || refreshTokenEntity.ExpiresAt < DateTime.Now)
+        {
+            return null;
+        }
+        
+        var user = await userRepository.FindByIdAsync(refreshTokenEntity.UserId);
+        if (user == null)
+        {
+            return null;
+        }
+        
+        var userRole = await userRepository.GetRole(user);
+
+        if (userRole == null)
+        {
+            throw new Exception("Проблема с ролями");
+        }
+        
+        var userResponse = new UserResponse
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            SurName = user.SurName,
+            LastName = user.LastName,
+            Role = userRole,
+            Status = user.Status.ToString(),
+            Email = user.Email,
+            Company = user.Company,
+            UserName = user.Email,
+        };
+        userResponse.Token = tokenService.GenerateAccessToken(userResponse);
+        return userResponse;
+    }
 }

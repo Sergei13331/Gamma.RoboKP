@@ -10,6 +10,6 @@ public record UserToGet(
     string LastName,
     string Email,
     UserStatus Status,
-    UserRole Role,
+    string Role,
     Company Company
     );

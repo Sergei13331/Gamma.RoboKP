@@ -28,11 +28,9 @@ public class User : BaseEntity<long>
     public UserRole Role { get; private set; }
     public Company Company { get; private set; }
     public string Email { get; private set; }
-    public bool EmailConfirmed { get; private set; } = false;
-    
-    public string PasswordHash { get; private set; }
+    public bool EmailConfirmed { get; private set; }
 
-    public void ChangeEmail(Email email)
+    public void SetEmail(string email)
     {
         if (email == Email) return;
         Email = email;
@@ -41,9 +39,24 @@ public class User : BaseEntity<long>
         //domain event для подтверждения
     }
 
-    public void ChangeStatus(UserStatus status)
+    public void SetStatus(UserStatus status)
     {
         Status = status;
+    }
+
+    public void SetFirstName(string firstName)
+    {
+        FirstName = firstName;
+    }
+
+    public void SetSurName(string surName)
+    {
+        SurName = surName;
+    }
+
+    public void SetLastName(string lastName)
+    {
+        LastName = lastName;
     }
 
     public static User Create(string firstName,

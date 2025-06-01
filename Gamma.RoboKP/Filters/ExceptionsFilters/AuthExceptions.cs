@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Gamma.RoboKP.Filters.ExceptionsFilters;
 
-public class UserExceptions : Attribute, IAsyncExceptionFilter
+public class AuthExceptions : Attribute, IAsyncExceptionFilter
 {
     public Task OnExceptionAsync(ExceptionContext context)
     {

@@ -17,7 +17,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     private readonly AuthOptions _authOptions = authOptions.Value;
     
     [HttpPost("register")]
-    [UserExceptions]
+    [AuthExceptions]
     public async Task<ActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
     {
         var result =  await authService.Register(userRegisterDto);
@@ -42,7 +42,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     }
     
     [HttpPost("login")]
-    [UserExceptions]
+    [AuthExceptions]
     public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
     {
         var result = await authService.Login(userLoginDto);
@@ -95,25 +95,25 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     //     return Ok();
     // }
     //
-    // [HttpPost("refresh")]
-    // [Authorize]
-    // public async Task<ActionResult<UserResponse>> RefreshToken()
-    // {
-    //     var refreshToken = Request.Cookies["refresh_token"];
-    //     if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
-    //     
-    //     var result = await authService.RefreshAccessToken(refreshToken);
-    //     if (result is null)
-    //     {
-    //         return NotFound();
-    //     }
-    //     Response.Cookies.Append("access_token", result.Token, new CookieOptions
-    //     {
-    //         HttpOnly = true,
-    //         Secure = true,
-    //         SameSite = SameSiteMode.Strict,
-    //         Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
-    //     });
-    //     return Ok(result);
-    // }
+    [HttpPost("refresh")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> RefreshToken()
+    {
+        var refreshToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
+        
+        var result = await authService.RefreshAccessToken(refreshToken);
+        if (result is null)
+        {
+            return NotFound();
+        }
+        Response.Cookies.Append("access_token", result.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
+        });
+        return Ok(result);
+    }
 }

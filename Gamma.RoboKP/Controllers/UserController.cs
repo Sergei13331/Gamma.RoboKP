@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Models.User;
+using Gamma.RoboKP.Filters.ExceptionsFilters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [HttpGet("{id}/role")]
     [Authorize(Roles = "admingamma")]
+    [AuthExceptions]
     public async Task<ActionResult<string>> GetUserRole([FromRoute] long id)
     {
         var result = await userService.GetUserRole(id);
@@ -34,6 +36,7 @@ public class UserController(IUserService userService) : ControllerBase
 
     [Authorize(Roles = "admingamma")]
     [HttpGet("{id}")]
+    [AuthExceptions]
     public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id)
     {
         var response = await userService.GetUserById(id);
@@ -50,6 +53,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [Authorize(Roles = "admingamma")] //TODO: admingamma как сonst
     [HttpPatch("{id}/role")]
+    [AuthExceptions]
     public async Task<ActionResult<bool>> SetRole([FromRoute] long id, [FromHeader] string role)
     {
         await userService.SetUserRole(id, role);
@@ -58,6 +62,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [Authorize(Roles = "admingamma")]
     [HttpGet("{id}/status")]
+    [AuthExceptions]
     public async Task<ActionResult<string>> GetStatus([FromRoute] long id)
     {
         var result = await userService.GetUserStatus(id);
@@ -66,6 +71,7 @@ public class UserController(IUserService userService) : ControllerBase
 
     [Authorize(Roles = "admingamma")]
     [HttpPatch("{id}/setStatus")]
+    [AuthExceptions]
     public async Task<ActionResult<bool>> SetStatus([FromRoute] long id, [FromHeader] string status)
     {
         await userService.SetStatus(id, status);
