@@ -1,12 +1,11 @@
-using Gamma.RoboKP.Application.Abstractions.Repositories;
-using Gamma.RoboKP.Application.Abstractions.Services;
-using Gamma.RoboKP.Application.Models.User;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Gamma.RoboKP.Application.Services;
 
@@ -40,7 +39,11 @@ public class UserService(IUserRepository userRepository, IMapper mapper) : IUser
         
         if (currentUserRoles == null)
         {
-            throw new Exception("Проблема с ролями");
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = "Ошибка. Пользователю не присвоена роль",
+                    Code = "Exception. User role not found." } });
         }
         await userRepository.RemoveFromRole(user, currentUserRoles);
         
@@ -92,7 +95,11 @@ public class UserService(IUserRepository userRepository, IMapper mapper) : IUser
         return user.Status.ToString();
     }
     
-    public async Task<bool> UpdateUser(long id, UserToUpdate userToUpdate)
+    public async Task<bool> UpdateUser(long id,
+        string? firstName = null, 
+        string? surName=null,
+        string? lastName=null,
+        string? email=null)
     {
         var user = await userRepository.FindByIdAsync(id);
         if (user == null) 
@@ -104,46 +111,24 @@ public class UserService(IUserRepository userRepository, IMapper mapper) : IUser
                     Code = "User not found" } });
         }
         
-        if (userToUpdate.FirstName != null) user.SetFirstName(userToUpdate.FirstName);
+        if (firstName != null) user.SetFirstName(firstName);
         
-        if(userToUpdate.SurName != null) user.SetSurName(userToUpdate.SurName);
+        if(surName != null) user.SetSurName(surName);
         
-        if(userToUpdate.LastName != null) user.SetLastName(userToUpdate.LastName);
+        if(lastName != null) user.SetLastName(lastName);
         
-        if (userToUpdate.Email != null) user.SetEmail(userToUpdate.Email);
+        if (email != null) user.SetEmail(email);
         
-        var result = await userRepository.UpdateAsync(user); // вот тут может быть проблема
+        var result = await userRepository.UpdateAsync(user);
         
         return result.Succeeded;
     }
     
-    public async Task<List<UserToGet>> GetAllUsers()
+    public async Task<List<User>> GetAllUsers()
     {
         var usersEntity = await userRepository.GetAll();
-    
-        var usersWithRoles = new List<UserToGet>();
-    
-        foreach (var user in usersEntity)
-        {
-            var roles = await userRepository.GetRole(user);
-            if (roles == null)
-            {
-                throw new Exception("Роль не найдкна"); // пока так
-            }
-            usersWithRoles.Add(new UserToGet
-            (
-                user.Id,
-                user.FirstName,
-                user.SurName,
-                user.LastName,
-                user.Email,
-                user.Status,
-                roles,
-                user.Company
-            ));
-        }
-    
-        return usersWithRoles;
+        
+        return usersEntity;
     }
     
     public async Task<bool> DeleteUser(long id)
@@ -156,42 +141,14 @@ public class UserService(IUserRepository userRepository, IMapper mapper) : IUser
         return result.Succeeded;
     }
     
-    public async Task<UserToGet> GetUserById(long id)
+    public async Task<User?> GetUserById(long id)
     {
-        var userEntity = await userRepository.FindByIdAsync(id);
-        if (userEntity == null)
-        {
-            throw new EntityNotFoundException(
-                new List<IdentityError>{new IdentityError()
-                {
-                    Description  = $"Пользователь c id {id} не найден",
-                    Code = "User not found" } });
-        }
-        var role = await userRepository.GetRole(userEntity);
-        if (role == null)
-        {
-            throw new Exception("Проблема с ролями");
-        }
-        var user = new UserToGet(
-    
-            userEntity.Id,
-            userEntity.FirstName,
-            userEntity.SurName,
-            userEntity.LastName,
-            userEntity.Email,
-            userEntity.Status,
-            role,
-            userEntity.Company
-        );
-        return user;
+        return await userRepository.FindByIdAsync(id);;
     } 
-    public async Task<UserToGet?> GetUserByEmail(string email)
+    public async Task<User?> GetUserByEmail(string email)
     {
         var entity = await userRepository.FindByEmailAsync(email);
-        if (entity == null) return null;
-        
-        var user = mapper.Map<User, UserToGet>(entity);
-        
-        return user;
+
+        return entity;
     }
 }

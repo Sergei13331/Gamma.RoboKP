@@ -2,7 +2,7 @@ namespace Gamma.RoboKP.Domain.Enums;
 
 public enum UserRole
 {
-    AdministratorGamma,
-    ManagerGamma,
+    Admin,
+    Manager,
     ManagerPartner
 }

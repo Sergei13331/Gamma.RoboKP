@@ -1,8 +1,10 @@
 using System.Security.Claims;
-using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Services;
-using Gamma.RoboKP.Application.Models.Authentication;
+using Gamma.RoboKP.Domain.Abstractions.Auth;
+using Gamma.RoboKP.Domain.Abstractions.Services;
+using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
+using Gamma.RoboKP.Models.Authentication;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,17 +14,24 @@ namespace Gamma.RoboKP.Controllers;
 [ApiController]
 [Route("api/auth")]
 public class AuthController(IOptions<AuthOptions> authOptions,
-    IAuthService authService, IRefreshTokenService refreshTokenService) : ControllerBase
+    IAuthService authService,
+    IRefreshTokenService refreshTokenService, 
+    IMapper mapper,
+    ITokenService tokenService) : ControllerBase
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
     [HttpPost("register")]
     [AuthExceptions]
-    public async Task<ActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
+    public async Task<ActionResult<UserResponse>> Register([FromBody] UserRegisterDto userRegisterDto)
     {
-        var result =  await authService.Register(userRegisterDto);
+        var user = mapper.Map<UserRegisterDto, User>(userRegisterDto);
+        var result =  await authService.Register(user, userRegisterDto.Password);
+
+        var token = tokenService.GenerateAccessToken(result);
+        var refreshToken = await tokenService.GenerateRefreshToken(result.Id);
         
-        Response.Cookies.Append("access_token", result.Token, new CookieOptions
+        Response.Cookies.Append("access_token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -30,7 +39,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
             Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
         });
         
-        Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
+        Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -38,16 +47,24 @@ public class AuthController(IOptions<AuthOptions> authOptions,
             Expires = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays),
         });
         
-        return Ok(result);
+        var newUserResponse = mapper.Map<User, UserResponse>(user);
+        newUserResponse.Token = token;
+        newUserResponse.RefreshToken = refreshToken;
+        newUserResponse.UserName = user.Email;
+        
+        return Ok(newUserResponse);
     }
     
     [HttpPost("login")]
     [AuthExceptions]
-    public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
+    public async Task<ActionResult<UserResponse>> Login([FromBody] UserLoginDto userLoginDto)
     {
-        var result = await authService.Login(userLoginDto);
-    
-        Response.Cookies.Append("access_token", result.Token, new CookieOptions
+        var result = await authService.Login(userLoginDto.Email, userLoginDto.Password);
+        
+        var token = tokenService.GenerateAccessToken(result);
+        var refreshToken = await tokenService.GenerateRefreshToken(result.Id);
+        
+        Response.Cookies.Append("access_token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -55,7 +72,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
             Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
         });
         
-        Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
+        Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -63,38 +80,44 @@ public class AuthController(IOptions<AuthOptions> authOptions,
             Expires = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays),
         });
         
-        return Ok(result);
+        var newUserResponse = mapper.Map<User, UserResponse>(result);
+        
+        newUserResponse.Token = token;
+        newUserResponse.RefreshToken = refreshToken;
+        newUserResponse.UserName = result.Email;
+        
+        return Ok(newUserResponse);
     }
-    //
-    // [Authorize]
-    // [HttpPost("logout")]
-    // public async Task<ActionResult> Logout()
-    // {
-    //     var refreshToken = Request.Cookies["refresh_token"];
-    //     await refreshTokenService.DeleteRefreshToken(refreshToken);
-    //     
-    //     Response.Cookies.Delete("access_token");
-    //     Response.Cookies.Delete("refresh_token");
-    //     
-    //     return Ok(new{message = "успешный выход из аккаунта"});
-    // }
-    //
-    // [Authorize]
-    // [HttpPost("logout/all")]
-    // public async Task<ActionResult> LogoutAll()
-    // {
-    //     var userIdFromClaims = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //     if (userIdFromClaims == null) return Unauthorized();
-    //     
-    //     var userId = long.Parse(userIdFromClaims);
-    //     
-    //     await refreshTokenService.DeleteAllUserRefreshTokens(userId);
-    //     
-    //     Response.Cookies.Delete("access_token");
-    //     Response.Cookies.Delete("refresh_token");
-    //     return Ok();
-    // }
-    //
+    
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies["refresh_token"];
+        await refreshTokenService.DeleteRefreshToken(refreshToken);
+        
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
+        
+        return Ok(new{message = "успешный выход из аккаунта"});
+    }
+    
+    [Authorize]
+    [HttpPost("logout/all")]
+    public async Task<ActionResult> LogoutAll()
+    {
+        var userIdFromClaims = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdFromClaims == null) return Unauthorized();
+        
+        var userId = long.Parse(userIdFromClaims);
+        
+        await refreshTokenService.DeleteAllUserRefreshTokens(userId);
+        
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
+        return Ok();
+    }
+    
     [HttpPost("refresh")]
     [Authorize]
     public async Task<ActionResult<UserResponse>> RefreshToken()
@@ -107,7 +130,9 @@ public class AuthController(IOptions<AuthOptions> authOptions,
         {
             return NotFound();
         }
-        Response.Cookies.Append("access_token", result.Token, new CookieOptions
+        var token = tokenService.GenerateAccessToken(result);
+        
+        Response.Cookies.Append("access_token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,

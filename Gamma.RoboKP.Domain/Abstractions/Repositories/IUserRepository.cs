@@ -1,8 +1,7 @@
 using Gamma.RoboKP.Domain.Entities;
-using Gamma.RoboKP.Domain.ValueObject;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gamma.RoboKP.Application.Abstractions.Repositories;
+namespace Gamma.RoboKP.Domain.Abstractions.Repositories;
 
 public interface IUserRepository
 {

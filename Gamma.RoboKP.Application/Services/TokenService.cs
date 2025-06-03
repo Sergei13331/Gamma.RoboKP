@@ -1,10 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Repositories;
-using Gamma.RoboKP.Application.Abstractions.Services;
-using Gamma.RoboKP.Application.Models.Authentication;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Services;
+using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -22,12 +21,14 @@ public class TokenService(IRefreshTokenService refreshTokenService,
         var refreshToken = refreshTokenService.GenerateRefreshToken();
         var hashed = refreshTokenService.HashToken(refreshToken);
         var expiresAt = DateTime.UtcNow.AddDays(_authOptions.RefreshTokenExpireDays);
-
-        await tokenRepository.SaveToken(Guid.NewGuid(), hashed, expiresAt, userId);
+        
+        var newToken = RefreshTokenEntity.Create(hashed, expiresAt, userId);
+        await tokenRepository.SaveToken(newToken);
+        
         return refreshToken;  
     }
     
-    public string GenerateAccessToken(UserResponse userRegisterModel)
+    public string GenerateAccessToken(User userRegisterModel)
     {
             var handler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_authOptions.TokenPrivateKey);
@@ -57,7 +58,7 @@ public class TokenService(IRefreshTokenService refreshTokenService,
             return handler.WriteToken(token);
     }
     
-    public ClaimsIdentity GenerateClaims(UserResponse userRegisterModel)
+    public ClaimsIdentity GenerateClaims(User userRegisterModel)
     {
         var claims = new ClaimsIdentity();
         claims.AddClaim(new Claim(ClaimTypes.Name, userRegisterModel.Email));

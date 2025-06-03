@@ -1,4 +1,4 @@
-namespace Gamma.RoboKP.Application.Models.Authentication;
+namespace Gamma.RoboKP.Models.Authentication;
 
 public record UserLoginDto(
     string Email,

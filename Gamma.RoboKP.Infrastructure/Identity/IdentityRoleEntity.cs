@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Gamma.RoboKP.Domain.Entities;
+namespace Gamma.RoboKP.Infrastructure.Identity;
 
 public class IdentityRoleEntity : IdentityRole<long>
 {

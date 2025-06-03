@@ -1,7 +1,6 @@
-using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.ValueObject;
 
-namespace Gamma.RoboKP.Application.Models.Authentication;
+namespace Gamma.RoboKP.Models.Authentication;
 
 public class UserResponse{
     public long Id { get; set; }

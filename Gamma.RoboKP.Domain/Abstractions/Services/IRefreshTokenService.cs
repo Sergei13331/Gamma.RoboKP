@@ -1,4 +1,4 @@
-namespace Gamma.RoboKP.Application.Abstractions.Services;
+namespace Gamma.RoboKP.Domain.Abstractions.Services;
 
 public interface IRefreshTokenService
 {

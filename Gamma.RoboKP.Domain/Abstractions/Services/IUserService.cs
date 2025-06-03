@@ -1,0 +1,16 @@
+using Gamma.RoboKP.Domain.Entities;
+
+namespace Gamma.RoboKP.Domain.Abstractions.Services;
+
+public interface IUserService
+{
+    Task<User?> GetUserByEmail(string email);
+    Task<string?> GetUserRole(long id);
+    Task SetUserRole(long id, string role);
+    Task<List<User>> GetAllUsers();
+    Task<bool> SetStatus(long id, string status);
+    Task<string> GetUserStatus(long id);
+    Task<bool> UpdateUser(long id, string? firstName = null, string? surName = null, string? lastName = null, string? email = null);
+    Task<bool> DeleteUser(long id);
+    Task<User?> GetUserById(long id);
+}

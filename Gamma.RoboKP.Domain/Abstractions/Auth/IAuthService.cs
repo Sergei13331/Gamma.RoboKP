@@ -1,13 +1,13 @@
-using Gamma.RoboKP.Application.Models.Authentication;
+using Gamma.RoboKP.Domain.Entities;
 
-namespace Gamma.RoboKP.Application.Abstractions.Auth;
+namespace Gamma.RoboKP.Domain.Abstractions.Auth;
 
 public interface IAuthService
 {
-    Task<UserResponse> Register(UserRegisterDto userRegisterDto);
-    Task<UserResponse> Login(UserLoginDto userLoginDto);
+    Task<User> Register(User userRegister, string password);
+    Task<User> Login(string email, string password);
     
-    Task<UserResponse?> RefreshAccessToken(string refreshToken);
+    Task<User?> RefreshAccessToken(string refreshToken);
     
     // обычно интерфесы в domain
     

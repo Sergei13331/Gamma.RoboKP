@@ -5,7 +5,6 @@ namespace Gamma.RoboKP.Domain.Entities;
 
 public class User : BaseEntity<long>
 {
-    
     public User() { }
     
     private User(string firstName, string surName, string lastName, UserStatus status, UserRole role, Company company, string email)
@@ -17,8 +16,6 @@ public class User : BaseEntity<long>
         Role = role;
         Company = company;
         Email = email;
-        //EmailConfirmed = emailConfirmed;
-       // PasswordHash = passwordHash;
     }
     
     public string FirstName { get; private set; } 
@@ -32,6 +29,12 @@ public class User : BaseEntity<long>
 
     public void SetEmail(string email)
     {
+        if(string.IsNullOrEmpty(email))
+            throw new ArgumentException("Почта обязательна");
+
+        if (!IsValidEmail(email))
+            throw new ArgumentException("Не верный формат почты");
+        
         if (email == Email) return;
         Email = email;
         EmailConfirmed = false;
@@ -68,5 +71,18 @@ public class User : BaseEntity<long>
         string email)
     {
         return new User(firstName, surName, lastName, status, role, company, email);
+    }
+
+    public bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

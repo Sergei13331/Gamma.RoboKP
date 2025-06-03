@@ -1,9 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
-using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Repositories;
-using Gamma.RoboKP.Application.Abstractions.Services;
 using Gamma.RoboKP.Application.Extensions;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Services;
 
 namespace Gamma.RoboKP.Application.Services;
 

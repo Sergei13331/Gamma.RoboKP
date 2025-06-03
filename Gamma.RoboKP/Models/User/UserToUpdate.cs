@@ -1,4 +1,4 @@
-namespace Gamma.RoboKP.Application.Models.User;
+namespace Gamma.RoboKP.Models.User;
 
 public class UserToUpdate
 {

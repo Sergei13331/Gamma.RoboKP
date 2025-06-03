@@ -1,4 +1,4 @@
-using Gamma.RoboKP.Application.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -7,18 +7,10 @@ namespace Gamma.RoboKP.Infrastructure.Repositories;
 
 public class TokenRepository(RoboKpDbContext context) : ITokenRepository
 {
-    public async Task SaveToken(Guid tokenId, string token, DateTime expiresAt , long userId)
+    public async Task SaveToken(RefreshTokenEntity refreshToken)
     {
-        var newEntity = new RefreshTokenEntity
-        {
-            Id = tokenId,
-            TokenHash = token,
-            ExpiresAt = expiresAt,
-            CreatedAt = DateTime.UtcNow,
-            UserId = userId,
-        };
         
-        await context.RefreshTokens.AddAsync(newEntity);
+        await context.RefreshTokens.AddAsync(refreshToken);
         await context.SaveChangesAsync();
     }
 

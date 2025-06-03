@@ -1,72 +1,47 @@
-using Gamma.RoboKP.Application.Abstractions.Auth;
-using Gamma.RoboKP.Application.Abstractions.Repositories;
-using Gamma.RoboKP.Application.Abstractions.Services;
-using Gamma.RoboKP.Application.Models.Authentication;
+using Gamma.RoboKP.Domain.Abstractions.Auth;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
-using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.Models;
-using Gamma.RoboKP.Domain.Options;
+using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
-public class AuthService(IOptions<AuthOptions> authOptions,
-    ITokenRepository refreshTokenRepository,
+public class AuthService(ITokenRepository refreshTokenRepository,
     IRefreshTokenService refreshTokenService,
-   // UserManager<User> userManager,
     ITokenService tokenService,
-    IUserRepository userRepository) : IAuthService
+    IUserRepository userRepository,
+    IMapper mapper) : IAuthService
 {
-    private readonly AuthOptions _authOptions = authOptions.Value;
-    
-    public async Task<UserResponse> Register(UserRegisterDto userRegisterDto)
+    public async Task<User> Register(User userRegister, string password)
     {
-        var entity = User.Create(userRegisterDto.FirstName, userRegisterDto.SurName, userRegisterDto.LastName,
-            UserStatus.Silver, UserRole.ManagerPartner, userRegisterDto.Company, userRegisterDto.Email);
-        
-        var existingUser = await userRepository.FindByEmailAsync(entity.Email);
+        var existingUser = await userRepository.FindByEmailAsync(userRegister.Email);
         
         if (existingUser != null) 
         {
             throw new NotValidUserException(
-                entity,
+                userRegister,
                 new List<IdentityError>() { new IdentityError() {
                     Description="Пользователь с такой почтой уже существует",
                     Code="Email Duplicate"} });
         }
         
-        var createUserResult = await userRepository.AddAsync(entity, userRegisterDto.Password);
+        var createUserResult = await userRepository.AddAsync(userRegister, password);
         if (createUserResult)
         {
-            var user = await userRepository.FindByEmailAsync(userRegisterDto.Email);
+            var user = await userRepository.FindByEmailAsync(userRegister.Email);
 
             if (user == null)
             {
-                throw new Exception("Что то пошло не так...");
+                throw new Exception("Что то пошло не так..."); // пока хз
             }
             
             var result = await userRepository.AddToRole(user, RoleConsts.ManagerPartner);
             if (result.Succeeded)
             {
-                var response = new UserResponse
-                {      
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    SurName = user.SurName,
-                    LastName = user.LastName,
-                    Role = RoleConsts.ManagerPartner,
-                    Status = user.Status.ToString(),
-                    Email = user.Email,
-                    Company = user.Company,
-                    UserName = user.Email,
-                }; 
-                
-                response.Token = tokenService.GenerateAccessToken(response);
-                response.RefreshToken = await tokenService.GenerateRefreshToken(user.Id);
-                
-                return response;
+                return user;
             }
     
             throw new Exception($"Errors: {string.Join(";", result.Errors
@@ -76,19 +51,20 @@ public class AuthService(IOptions<AuthOptions> authOptions,
     }
     
     
-    public async Task<UserResponse> Login(UserLoginDto userLoginDto)
+    public async Task<User> Login(string email, string password)
     {
-        var user = await userRepository.FindByEmailAsync(userLoginDto.Email);
+        var user = await userRepository.FindByEmailAsync(email);
         
         if (user == null)
         {
             throw new EntityNotFoundException(
                 new List<IdentityError>{new IdentityError()
                 {
-                  Description  = $"Пользователь с почтой {userLoginDto.Email} не найден",
+                  Description  = $"Пользователь с почтой {email} не найден",
                   Code = "Email not found" } });
         }
-        var checkPasswordResult = await userRepository.CheckPassword(user, userLoginDto.Password);
+        
+        var checkPasswordResult = await userRepository.CheckPassword(user, password);
         
         if (checkPasswordResult)
         {
@@ -96,25 +72,14 @@ public class AuthService(IOptions<AuthOptions> authOptions,
 
             if (userRole == null)
             {
-                throw new Exception("Проблема с ролями"); //пока так
+                throw new EntityNotFoundException(
+                    new List<IdentityError>{new IdentityError()
+                    {
+                        Description  = "Ошибка. Пользователю не присвоена роль",
+                        Code = "Exception. User role not found." } });
             }
             
-            var userResponse = new UserResponse
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                SurName = user.SurName,
-                LastName = user.LastName,
-                Role = userRole,
-                Status = user.Status.ToString(),
-                Email = user.Email,
-                Company = user.Company,
-                UserName = user.Email,
-            };
-            userResponse.Token = tokenService.GenerateAccessToken(userResponse);
-            userResponse.RefreshToken = await tokenService.GenerateRefreshToken(user.Id);
-                
-            return userResponse;
+            return user;
         }
     
         throw new PasswordFailedException(
@@ -124,7 +89,7 @@ public class AuthService(IOptions<AuthOptions> authOptions,
                 Code = "Invalid Password"} });
     }
     
-    public async Task<UserResponse?> RefreshAccessToken(string refreshToken)
+    public async Task<User?> RefreshAccessToken(string refreshToken)
     {
         var hashToken = refreshTokenService.HashToken(refreshToken);
         
@@ -145,22 +110,13 @@ public class AuthService(IOptions<AuthOptions> authOptions,
 
         if (userRole == null)
         {
-            throw new Exception("Проблема с ролями");
+            throw new EntityNotFoundException(
+                new List<IdentityError>{new IdentityError()
+                {
+                    Description  = "Ошибка. Пользователю не присвоена роль",
+                    Code = "Exception. User role not found." } });
         }
         
-        var userResponse = new UserResponse
-        {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            SurName = user.SurName,
-            LastName = user.LastName,
-            Role = userRole,
-            Status = user.Status.ToString(),
-            Email = user.Email,
-            Company = user.Company,
-            UserName = user.Email,
-        };
-        userResponse.Token = tokenService.GenerateAccessToken(userResponse);
-        return userResponse;
+        return user;
     }
 }

@@ -1,4 +1,4 @@
-using Gamma.RoboKP.Application.Abstractions.Repositories;
+using Gamma.RoboKP.Domain.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Exceptions;
 using Gamma.RoboKP.Domain.ValueObject;
@@ -90,7 +90,7 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
 
     public async Task<IdentityResult> UpdateAsync(User user)
     {
-        // Получаем оригинального пользователя из базы по Id
+        
         var appUser = await userManager.FindByIdAsync(user.Id.ToString());
 
         if (appUser == null)
@@ -104,15 +104,13 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
                 }
             });
         }
-
-        // Обновляем только нужные поля
+        
         appUser.Email = user.Email;
         appUser.FirstName = user.FirstName;
         appUser.LastName = user.LastName;
         appUser.SurName = user.SurName;
         appUser.Status = user.Status;
-
-        // Обновляем через Identity
+        
         var result = await userManager.UpdateAsync(appUser);
         return result;
     }

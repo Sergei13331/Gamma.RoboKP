@@ -1,6 +1,6 @@
 using Gamma.RoboKP.Domain.Enums;
 
-namespace Gamma.RoboKP.Application.Models.User;
+namespace Gamma.RoboKP.Models.User;
 
 public record UserToRegister(
     string Name,
