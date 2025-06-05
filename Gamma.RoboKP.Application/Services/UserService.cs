@@ -151,4 +151,14 @@ public class UserService(IUserRepository userRepository, IMapper mapper) : IUser
 
         return entity;
     }
+
+    public async Task<string?> GeneratePasswordResetTokenAsync(string email)
+    {
+        return await userRepository.GeneratePasswordResetTokenAsync(email);
+    }
+
+    public async Task<IdentityResult?> ResetPassword(string email, string token, string newPassword)
+    {
+        return await userRepository.ResetPassword(email, token, newPassword);
+    }
 }

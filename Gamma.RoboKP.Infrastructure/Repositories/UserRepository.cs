@@ -125,4 +125,24 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
         
         return result;
     }
+
+    public async Task<string?> GeneratePasswordResetTokenAsync(string email)
+    {
+        var appUser = await userManager.FindByEmailAsync(email);
+        if (appUser == null) return null;
+        
+        var token = await userManager.GeneratePasswordResetTokenAsync(appUser);
+        
+        return token;
+    }
+
+    public async Task<IdentityResult?> ResetPassword(string email, string token, string newPassword)
+    {
+        var appUser = await userManager.FindByEmailAsync(email);
+        if (appUser == null) return null;
+        
+        var result = await userManager.ResetPasswordAsync(appUser, token, newPassword);
+        
+        return result;
+    }
 }

@@ -1,4 +1,5 @@
 using Gamma.RoboKP.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Gamma.RoboKP.Domain.Abstractions.Services;
 
@@ -13,4 +14,6 @@ public interface IUserService
     Task<bool> UpdateUser(long id, string? firstName = null, string? surName = null, string? lastName = null, string? email = null);
     Task<bool> DeleteUser(long id);
     Task<User?> GetUserById(long id);
+    Task<string?> GeneratePasswordResetTokenAsync(string email);
+    Task<IdentityResult?> ResetPassword(string email, string token, string newPassword);
 }

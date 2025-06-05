@@ -1,4 +1,6 @@
 using Gamma.RoboKP.Application.Extensions;
+using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Extensions;
 
 //TODO: при регистрации для подтверждения почты отправлять код на почту 
@@ -7,6 +9,9 @@ using Gamma.RoboKP.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
+
 builder.Services.AddControllers();
 
 builder.Services.RegisterMapster();

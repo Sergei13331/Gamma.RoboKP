@@ -4,9 +4,11 @@ using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
 using Gamma.RoboKP.Models.Authentication;
+using Gamma.RoboKP.Models.User;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using AuthOptions = Gamma.RoboKP.Domain.Options.AuthOptions;
 
@@ -17,7 +19,9 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     IAuthService authService,
     IRefreshTokenService refreshTokenService, 
     IMapper mapper,
-    ITokenService tokenService) : ControllerBase
+    ITokenService tokenService,
+    IMailService mailService,
+    IUserService userService) : ControllerBase
 {
     private readonly AuthOptions _authOptions = authOptions.Value;
     
@@ -140,5 +144,42 @@ public class AuthController(IOptions<AuthOptions> authOptions,
             Expires = DateTime.UtcNow.AddMinutes(_authOptions.ExpireMinutes),
         });
         return Ok(result);
+    }
+
+    [HttpPost("forgotpassword")]
+    public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        if(!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var token = await userService.GeneratePasswordResetTokenAsync(forgotPasswordDto.Email!);
+        
+        if(token is null) return BadRequest("User not found");
+
+        var param = new Dictionary<string, string?>
+        {
+            { "token", token },
+            { "email", forgotPasswordDto.Email }
+        };
+        var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri!, param);
+        
+        var message = new MailData(forgotPasswordDto.Email!, null!, "Reset password token", callback);
+        mailService.SendMail(message);
+        return Ok();
+    }
+
+    [HttpPost("resetpassword")]
+    public async Task<ActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+    {
+        if(!ModelState.IsValid) return BadRequest();
+        
+        var result = await userService.ResetPassword(resetPasswordDto.Email!, resetPasswordDto.Token!, resetPasswordDto.Password!);
+        
+        if(result is null) return NotFound();
+
+        if (result.Succeeded) return Ok();
+        
+        var errors = result.Errors.Select(e => e.Description);
+        return BadRequest(new {Errors = errors});
+
     }
 }

@@ -11,3 +11,4 @@ riderModule.iml
 *.info
 *.cache
 .DS_Store
+**/appsettings.Development.json

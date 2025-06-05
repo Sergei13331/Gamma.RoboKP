@@ -15,4 +15,6 @@ public interface IUserRepository
     Task<List<User>> GetAll();
     Task RemoveFromRole(User user, string role);
     Task<IdentityResult> Delete(User user);
+    Task<string?> GeneratePasswordResetTokenAsync(string email);
+    Task<IdentityResult?> ResetPassword(string email, string token, string newPassword);
 }
