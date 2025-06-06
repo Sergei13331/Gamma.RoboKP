@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using Gamma.RoboKP.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

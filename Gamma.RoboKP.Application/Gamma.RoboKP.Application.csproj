@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Gamma.RoboKP.Domain\Gamma.RoboKP.Domain.csproj" />
+      <ProjectReference Include="..\Gamma.RoboKP.Infrastructure\Gamma.RoboKP.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

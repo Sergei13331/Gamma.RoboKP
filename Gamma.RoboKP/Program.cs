@@ -1,5 +1,4 @@
 using Gamma.RoboKP.Application.Extensions;
-using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Extensions;
 

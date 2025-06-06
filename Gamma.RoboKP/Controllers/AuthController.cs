@@ -4,7 +4,6 @@ using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
 using Gamma.RoboKP.Models.Authentication;
-using Gamma.RoboKP.Models.User;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +17,7 @@ namespace Gamma.RoboKP.Controllers;
 public class AuthController(IOptions<AuthOptions> authOptions,
     IAuthService authService,
     IRefreshTokenService refreshTokenService, 
-    IMapper mapper,
+    [FromKeyedServices("ControllerMapper")] IMapper mapper,
     ITokenService tokenService,
     IMailService mailService,
     IUserService userService) : ControllerBase
@@ -31,7 +30,7 @@ public class AuthController(IOptions<AuthOptions> authOptions,
     {
         var user = mapper.Map<UserRegisterDto, User>(userRegisterDto);
         var result =  await authService.Register(user, userRegisterDto.Password);
-
+        
         var token = tokenService.GenerateAccessToken(result);
         var refreshToken = await tokenService.GenerateRefreshToken(result.Id);
         
@@ -52,6 +51,8 @@ public class AuthController(IOptions<AuthOptions> authOptions,
         });
         
         var newUserResponse = mapper.Map<User, UserResponse>(user);
+        newUserResponse.Id = user.Id;
+        newUserResponse.Role = result.Role.ToString();
         newUserResponse.Token = token;
         newUserResponse.RefreshToken = refreshToken;
         newUserResponse.UserName = user.Email;

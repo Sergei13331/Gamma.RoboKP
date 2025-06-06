@@ -2,18 +2,19 @@ using Gamma.RoboKP.Domain.Abstractions.Auth;
 using Gamma.RoboKP.Domain.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
-using Gamma.RoboKP.Domain.Models;
+//using Gamma.RoboKP.Domain.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Exception = System.Exception;
 
 namespace Gamma.RoboKP.Application.Services;
 public class AuthService(ITokenRepository refreshTokenRepository,
     IRefreshTokenService refreshTokenService,
     ITokenService tokenService,
-    IUserRepository userRepository,
-    IMapper mapper) : IAuthService
+    IUserRepository userRepository) : IAuthService
 {
     public async Task<User> Register(User userRegister, string password)
     {
@@ -38,7 +39,13 @@ public class AuthService(ITokenRepository refreshTokenRepository,
                 throw new Exception("Что то пошло не так..."); // пока хз
             }
             
-            var result = await userRepository.AddToRole(user, RoleConsts.ManagerPartner);
+            var result = await userRepository.AddToRole(user, UserRole.ManagerPartner.ToString());
+
+            var userRoleString = await userRepository.GetRole(user);
+            var userRole = (UserRole)Enum.Parse(typeof(UserRole), userRoleString!, ignoreCase: true);
+            
+            user.SetRole(userRole);
+            
             if (result.Succeeded)
             {
                 return user;

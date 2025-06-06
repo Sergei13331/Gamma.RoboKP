@@ -1,13 +1,14 @@
 using System.Text;
+using Gamma.RoboKP.Application.Extensions;
 using Gamma.RoboKP.Application.Services;
 using Gamma.RoboKP.Domain.Abstractions.Auth;
 using Gamma.RoboKP.Domain.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Abstractions.Services;
-using Gamma.RoboKP.Domain.Entities;
-using Gamma.RoboKP.Domain.Models;
+using Gamma.RoboKP.Domain.Enums;
+//using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Domain.Options;
 using Gamma.RoboKP.Infrastructure.Context;
-using Gamma.RoboKP.Infrastructure.Identity;
+using Gamma.RoboKP.Infrastructure.Models;
 using Gamma.RoboKP.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using NETCore.MailKit.Core;
 
 namespace Gamma.RoboKP.Extensions;
 
@@ -72,13 +72,14 @@ public static class ServiceCollectionsExtensions
     {
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
         
+        builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddTransient<IMailService, MailService>();
-        
         
         return builder;
     }
@@ -124,9 +125,9 @@ public static class ServiceCollectionsExtensions
             });
         builder.Services.AddAuthorization(options => // роли
         {
-            options.AddPolicy("Admin", policy => policy.RequireRole(RoleConsts.AdminGamma));
-            options.AddPolicy("ManagerGamma", policy => policy.RequireRole(RoleConsts.ManagerGamma));
-            options.AddPolicy("ManagerPartner", policy => policy.RequireRole(RoleConsts.ManagerPartner));
+            options.AddPolicy("Admin", policy => policy.RequireRole(UserRole.Admin.ToString()));
+            options.AddPolicy("ManagerGamma", policy => policy.RequireRole(UserRole.Manager.ToString()));
+            options.AddPolicy("ManagerPartner", policy => policy.RequireRole(UserRole.ManagerPartner.ToString()));
         });
        // builder.Services.AddTransient<IAuthService, AuthService>();
         builder.Services.AddDefaultIdentity<AppUser>(options =>

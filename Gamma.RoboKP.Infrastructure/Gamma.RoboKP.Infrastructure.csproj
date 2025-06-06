@@ -23,7 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Gamma.RoboKP.Application\Gamma.RoboKP.Application.csproj" />
       <ProjectReference Include="..\Gamma.RoboKP.Domain\Gamma.RoboKP.Domain.csproj" />
     </ItemGroup>
 

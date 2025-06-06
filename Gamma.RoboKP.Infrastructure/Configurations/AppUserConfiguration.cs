@@ -1,4 +1,4 @@
-using Gamma.RoboKP.Infrastructure.Identity;
+using Gamma.RoboKP.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

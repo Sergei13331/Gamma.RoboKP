@@ -1,5 +1,3 @@
-using Gamma.RoboKP.Domain.Enums;
-
 namespace Gamma.RoboKP.Domain.Entities;
 
 public class BaseEntity<T>

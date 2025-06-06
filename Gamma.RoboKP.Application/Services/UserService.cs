@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gamma.RoboKP.Application.Services;
 
-public class UserService(IUserRepository userRepository, IMapper mapper) : IUserService
+public class UserService(IUserRepository userRepository) : IUserService
 {
     public async Task<string?> GetUserRole(long id)
     {

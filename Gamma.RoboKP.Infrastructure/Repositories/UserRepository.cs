@@ -1,15 +1,16 @@
 using Gamma.RoboKP.Domain.Abstractions.Repositories;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.Exceptions;
-using Gamma.RoboKP.Domain.ValueObject;
-using Gamma.RoboKP.Infrastructure.Identity;
+using Gamma.RoboKP.Infrastructure.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Gamma.RoboKP.Infrastructure.Repositories;
 
-public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : IUserRepository
+public class UserRepository(UserManager<AppUser> userManager, [FromKeyedServices("RepositoryMapper")] IMapper mapper) : IUserRepository
 {
     public async Task<User?> FindByEmailAsync(string email)
     {
@@ -18,6 +19,11 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
         if (appUser == null) return null;
         
         var entity = mapper.Map<AppUser, User>(appUser);
+        
+        var userRole = await userManager.GetRolesAsync(appUser);
+        
+        Enum.TryParse<UserRole>(userRole.FirstOrDefault(), true, out var role);
+        entity.SetRole(role);
         
         return entity;
     }
@@ -28,6 +34,11 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
         if (appUser == null) return null;
         
         var entity = mapper.Map<AppUser, User>(appUser);
+        
+        var userRole = await userManager.GetRolesAsync(appUser);
+        
+        Enum.TryParse<UserRole>(userRole.FirstOrDefault(), true, out var role);
+        entity.SetRole(role);
         
         return entity;
     }
@@ -49,6 +60,7 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
             throw new InvalidOperationException($"User with ID {user.Id} not found");
 
         var result = await userManager.AddToRoleAsync(appUser, role);
+        
         return result;
     }
 
@@ -75,9 +87,19 @@ public class UserRepository(UserManager<AppUser> userManager, IMapper mapper) : 
     public async Task<List<User>> GetAll()
     {
         var usersApp = await userManager.Users.ToListAsync();
-        var user = mapper.Map<List<AppUser>, List<User>>(usersApp);
         
-        return user;
+        var users = mapper.Map<List<AppUser>, List<User>>(usersApp);
+
+        for (int i = 0; i < users.Count; i++)
+        {
+            var roles = await userManager.GetRolesAsync(usersApp[i]);
+            if (Enum.TryParse<UserRole>(roles.FirstOrDefault(), true, out var role))
+            {
+                users[i].SetRole(role);
+            }
+        }
+
+        return users;
     }
 
     public async Task RemoveFromRole(User user, string role)

@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Domain.ValueObject;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gamma.RoboKP.Infrastructure.Identity;
+namespace Gamma.RoboKP.Infrastructure.Models;
 
 public class AppUser : IdentityUser<long>
 {

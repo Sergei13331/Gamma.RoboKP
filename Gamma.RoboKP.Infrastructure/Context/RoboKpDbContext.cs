@@ -1,6 +1,6 @@
 using Gamma.RoboKP.Domain.Entities;
 using Gamma.RoboKP.Infrastructure.Configurations;
-using Gamma.RoboKP.Infrastructure.Identity;
+using Gamma.RoboKP.Infrastructure.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +14,7 @@ public class RoboKpDbContext : IdentityDbContext<AppUser, IdentityRoleEntity, lo
     
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     public DbSet<AppUser> Users { get; set; }
+    public DbSet<Produсt> Products { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

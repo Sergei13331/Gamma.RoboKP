@@ -62,6 +62,11 @@ public class User : BaseEntity<long>
         LastName = lastName;
     }
 
+    public void SetRole(UserRole role)
+    {
+        Role = role;
+    }
+
     public static User Create(string firstName,
         string surName,
         string lastName,

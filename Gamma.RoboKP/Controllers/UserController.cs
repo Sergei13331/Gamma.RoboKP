@@ -1,7 +1,8 @@
 using System.Security.Claims;
 using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
-using Gamma.RoboKP.Domain.Models;
+using Gamma.RoboKP.Domain.Enums;
+//using Gamma.RoboKP.Domain.Models;
 using Gamma.RoboKP.Filters.ExceptionsFilters;
 using Gamma.RoboKP.Models.User;
 using MapsterMapper;
@@ -11,11 +12,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gamma.RoboKP.Controllers;
 [ApiController]
 [Route("api/users")]
-public class UserController(IUserService userService, IMapper mapper) : ControllerBase
+public class UserController(IUserService userService, [FromKeyedServices("ControllerMapper")] IMapper mapper) : ControllerBase
 {
     
     [HttpGet("{id}/role")]
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [AuthExceptions]
     public async Task<ActionResult<string>> GetUserRole([FromRoute] long id)
     {
@@ -40,10 +41,10 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return Ok(response);
     }
 
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles =nameof(UserRole.Admin))]
     [HttpGet("{id}")]
     [AuthExceptions]
-    public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id)
+    public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id) // вот тут почему то не правильно выводится роль
     {
         var user = await userService.GetUserById(id);
         if (user is null) return NotFound();
@@ -53,7 +54,7 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return Ok(response);
     }
     
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpGet]
     public async Task<ActionResult<List<UserToGet>>> GetUsers()
     {
@@ -64,7 +65,7 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return Ok(response);
     }
     
-    [Authorize(Roles = RoleConsts.AdminGamma)] //TODO: admingamma как сonst
+    [Authorize(Roles = nameof(UserRole.Admin))] //TODO: admingamma как сonst
     [HttpPatch("{id}/role")]
     [AuthExceptions]
     public async Task<ActionResult<bool>> SetRole([FromRoute] long id, [FromHeader] string role)
@@ -73,7 +74,7 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return Ok();
     }
     
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpGet("{id}/status")]
     [AuthExceptions]
     public async Task<ActionResult<string>> GetStatus([FromRoute] long id)
@@ -82,7 +83,7 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return Ok(result);
     }
 
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPatch("{id}/setStatus")]
     [AuthExceptions]
     public async Task<ActionResult<bool>> SetStatus([FromRoute] long id, [FromHeader] string status)
@@ -106,7 +107,7 @@ public class UserController(IUserService userService, IMapper mapper) : Controll
         return BadRequest(response);
     }
 
-    [Authorize(Roles = RoleConsts.AdminGamma)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpDelete("{id}")]
     public async Task<ActionResult<bool>> Delete([FromRoute] long id)
     {
