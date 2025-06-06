@@ -12,7 +12,7 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
 {
     public async Task<long> Create(ProductEntity product)
     {
-        var productDb = mapper.Map<ProductEntity, Produсt>(product);
+        var productDb = mapper.Map<ProductEntity, Product>(product);
         
         await context.Products.AddAsync(productDb);
         await context.SaveChangesAsync();

@@ -14,7 +14,7 @@ public class RoboKpDbContext : IdentityDbContext<AppUser, IdentityRoleEntity, lo
     
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     public DbSet<AppUser> Users { get; set; }
-    public DbSet<Produсt> Products { get; set; }
+    public DbSet<Product> Products { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
