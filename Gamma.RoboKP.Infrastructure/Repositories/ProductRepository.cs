@@ -45,7 +45,7 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
 
     public Task<long> UpdateImage(long id, byte[] image)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException(); // TODO Перевод в формат URI
     }
 
     public async Task<bool> Delete(long id)
