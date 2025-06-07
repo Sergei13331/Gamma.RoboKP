@@ -5,4 +5,9 @@ namespace Gamma.RoboKP.Domain.Abstractions.Services;
 public interface IProductService
 {
     Task<long> CreateProduct(ProductEntity product);
+    Task<ProductEntity?> GetProduct(long id);
+    Task<List<ProductEntity>> GetProducts();
+    Task<long> UpdateProductData(long id, string name, string description, decimal price);
+    Task<long> UpdateProductImage(long id, byte[] image);
+    Task<bool> RemoveProduct(long id);
 }
