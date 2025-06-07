@@ -26,9 +26,9 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         return productRepository.Update(id, name, description, price);
     }
 
-    public Task<long> UpdateProductImage(long id, byte[] image)
+    public Task<long> UpdateProductImage(long id, string imageUrl)
     {
-        return productRepository.UpdateImage(id, image);
+        return productRepository.UpdateImage(id, imageUrl);
     }
 
     public Task<bool> RemoveProduct(long id)

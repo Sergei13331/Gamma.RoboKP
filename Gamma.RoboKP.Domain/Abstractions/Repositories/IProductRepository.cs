@@ -8,6 +8,6 @@ public interface IProductRepository
     Task<ProductEntity?> Get(long id);
     Task<List<ProductEntity>> GetAll();
     Task<long> Update(long id, string name, string description, decimal price);
-    Task<long> UpdateImage(long id, byte[] image);
+    Task<long> UpdateImage(long id, string imageUrl);
     Task<bool> Delete(long id);
 }

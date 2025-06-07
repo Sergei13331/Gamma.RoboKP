@@ -43,9 +43,13 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         return await context.SaveChangesAsync() > 0 ? id : 0;
     }
 
-    public Task<long> UpdateImage(long id, byte[] image)
+    public async Task<long> UpdateImage(long id, string imageUrl)
     {
-        throw new NotImplementedException(); // TODO Перевод в формат URI
+        var productDb = await context.Products.FindAsync(id);
+        if (productDb == null) return 0;
+        productDb.ImageUrl = imageUrl;
+        context.Products.Update(productDb);
+        return await context.SaveChangesAsync() > 0 ? id : 0;
     }
 
     public async Task<bool> Delete(long id)
