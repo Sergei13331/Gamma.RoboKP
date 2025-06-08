@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Gamma.RoboKP.Infrastructure.Models;
 
-public class Produсt
+public class Product
 {
     public long Id { get; set; }
     [Required]

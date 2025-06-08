@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Gamma.RoboKP.Infrastructure.Configurations;
 
-public class ProductsConfiguration : IEntityTypeConfiguration<Produсt>
+public class ProductsConfiguration : IEntityTypeConfiguration<Product>
 {
-    public void Configure(EntityTypeBuilder<Produсt> builder)
+    public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.HasKey(p => p.Id);
     }
