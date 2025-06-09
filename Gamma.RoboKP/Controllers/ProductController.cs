@@ -60,6 +60,22 @@ public class ProductController(
         
         return Ok(response);
     }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<List<ProductResponseDto>>> SearchProducts(
+        [FromQuery] string? name,
+        [FromQuery] decimal? exactPrice,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var result = await productService.SearchAndFilter(name, exactPrice, minPrice, maxPrice, page, pageSize);
+        if (result is null) return NotFound();
+        
+        var response = mapper.Map<List<ProductResponseDto>>(result);
+        return Ok(response);
+    }
     
     [HttpPatch("{id}")]
     public async Task<ActionResult<long>> UpdateData([FromRoute]long id, [FromBody] ProductToUpdate productDto)

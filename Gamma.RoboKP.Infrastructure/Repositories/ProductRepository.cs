@@ -52,7 +52,52 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         
         return mapper.Map<List<ProductEntity>>(productDb);
     }
+    
+    public async Task<List<ProductEntity>?> SearchProducts(
+        string? name = null,
+        decimal? exactPrice = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        int pageNumber = 1,
+        int pageSize = 50)
+    {
+        var query = context.Products.AsNoTracking().AsQueryable();
+        
+        if (exactPrice.HasValue)
+        {
+            query = query.Where(p => p.Price == exactPrice.Value);
+        }
+        else
+        {
+            if (minPrice.HasValue && maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value && p.Price <= maxPrice.Value);
+            }
+            else if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+            else if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+        }
+        
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(p => p.Name.Contains(name));
+        }
+        
+        query = query.OrderBy(p => p.Price)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
 
+        var productDb = await query.ToListAsync();
+    
+        return productDb.Any() 
+            ? mapper.Map<List<ProductEntity>>(productDb) 
+            : null;
+    }
     public async Task<long> Update(long id, string name, string description, decimal price)
     {
         var productDb = await context.Products.FindAsync(id);
