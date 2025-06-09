@@ -90,4 +90,4 @@ public class User : BaseEntity<long>
             return false;
         }
     }
-}
+}//TODO:многие ко многим с категорией(создать таблицу категории)

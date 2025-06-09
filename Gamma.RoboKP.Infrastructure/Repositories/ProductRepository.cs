@@ -32,13 +32,36 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         return mapper.Map<List<ProductEntity>>(productsDb);
     }
 
+    public async Task<List<ProductEntity>?> SearchByName(string name)
+    {
+        var productDb = await context.Products.Where(p => p.Name.Contains(name)).ToListAsync();
+        if (!productDb.Any()) return null;
+        
+        return mapper.Map<List<ProductEntity>>(productDb);
+    }
+
+    public async Task<List<ProductEntity>?> SearchByPrice(decimal price)
+    {
+        var productDb = await context.Products
+            .AsNoTracking()
+            .Where(p => p.Price == price)
+            .OrderBy(p => p.Price)
+            .ToListAsync();
+        
+        if (!productDb.Any()) return null;
+        
+        return mapper.Map<List<ProductEntity>>(productDb);
+    }
+
     public async Task<long> Update(long id, string name, string description, decimal price)
     {
         var productDb = await context.Products.FindAsync(id);
         if (productDb == null) return 0;
-        productDb.Name = name;
-        productDb.Description = description;
-        productDb.Price = price;
+        
+        if (productDb.Name != name) productDb.Name = name;
+        if (productDb.Description != description) productDb.Description = description;
+        if (productDb.Price != price) productDb.Price = price;
+        
         context.Products.Update(productDb);
         return await context.SaveChangesAsync() > 0 ? id : 0;
     }

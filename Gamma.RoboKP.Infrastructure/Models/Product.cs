@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gamma.RoboKP.Infrastructure.Models;
 
@@ -11,7 +12,7 @@ public class Product
     [MaxLength(500)]
     public string Description { get; set; } = string.Empty;
     [Required]
-    public decimal Price { get; set; }
+    public decimal? Price { get; set; }
     [Required]
     [MaxLength(500)]
     public string ImageUrl { get; set; } = string.Empty;

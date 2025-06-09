@@ -39,15 +39,37 @@ public class ProductController(
         return Ok(response);
     }
 
-    [HttpPatch("{id}/change-data")]
-    public async Task<ActionResult<long>> UpdateData(long id, string name, string description, decimal price)
+    [HttpGet("name/{name}")]
+    public async Task<ActionResult<List<ProductResponseDto>>> SearchByName([FromRoute] string name)
     {
-        var result = await productService.UpdateProductData(id, name, description, price);
+        var products = await productService.GetProductsByName(name);
+        if (products == null) return NotFound();
+        
+        var response = mapper.Map<List<ProductResponseDto>>(products);
+        
+        return Ok(response);
+    }
+
+    [HttpGet("price/{price}")]
+    public async Task<ActionResult<List<ProductResponseDto>>> SearchByPrice([FromRoute] decimal price)
+    {
+        var products = await productService.GetProductByPrice(price);
+        if (products == null) return NotFound();
+        
+        var response = mapper.Map<List<ProductResponseDto>>(products);
+        
+        return Ok(response);
+    }
+    
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<long>> UpdateData([FromRoute]long id, [FromBody] ProductToUpdate productDto)
+    {
+        var result = await productService.UpdateProductData(id, productDto.Name, productDto.Description, productDto.Price);
         if (result == 0) return NotFound();
         return Ok(result);
     }
 
-    [HttpPatch("{id}/change-image")]
+    [HttpPatch("{id}/image")]
     public async Task<ActionResult<long>> UpdateImage(long id, string imageUrl)
     {
         var result = await productService.UpdateProductImage(id, imageUrl);

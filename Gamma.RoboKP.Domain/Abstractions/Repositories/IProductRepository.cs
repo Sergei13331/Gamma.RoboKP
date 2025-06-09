@@ -7,6 +7,8 @@ public interface IProductRepository
     Task<long> Create(ProductEntity product);
     Task<ProductEntity?> Get(long id);
     Task<List<ProductEntity>> GetAll();
+    Task<List<ProductEntity>?> SearchByName(string name);
+    Task<List<ProductEntity>?> SearchByPrice(decimal price);
     Task<long> Update(long id, string name, string description, decimal price);
     Task<long> UpdateImage(long id, string imageUrl);
     Task<bool> Delete(long id);

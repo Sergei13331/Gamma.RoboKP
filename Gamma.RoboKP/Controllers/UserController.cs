@@ -44,7 +44,7 @@ public class UserController(IUserService userService, [FromKeyedServices("Contro
     [Authorize(Roles =nameof(UserRole.Admin))]
     [HttpGet("{id}")]
     [AuthExceptions]
-    public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id) // вот тут почему то не правильно выводится роль
+    public async Task<ActionResult<UserToGet>> GetUser([FromRoute] long id)
     {
         var user = await userService.GetUserById(id);
         if (user is null) return NotFound();

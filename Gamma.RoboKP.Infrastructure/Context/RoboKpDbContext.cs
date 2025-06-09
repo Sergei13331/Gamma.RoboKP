@@ -25,5 +25,9 @@ public class RoboKpDbContext : IdentityDbContext<AppUser, IdentityRoleEntity, lo
         modelBuilder.Entity<AppUser>()
             .Property(u => u.Status)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Product>()
+            .HasIndex(u => u.Price)
+            .HasDatabaseName("IX_Products_Price");
     }
 }

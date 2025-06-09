@@ -21,6 +21,16 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         return await productRepository.GetAll();
     }
 
+    public async Task<List<ProductEntity>?> GetProductsByName(string name)
+    {
+        return await productRepository.SearchByName(name);
+    }
+
+    public async Task<List<ProductEntity>?> GetProductByPrice(decimal price)
+    {
+        return await productRepository.SearchByPrice(price);
+    }
+
     public Task<long> UpdateProductData(long id, string name, string description, decimal price)
     {
         return productRepository.Update(id, name, description, price);

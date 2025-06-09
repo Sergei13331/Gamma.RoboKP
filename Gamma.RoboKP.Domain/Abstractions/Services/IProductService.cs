@@ -7,6 +7,8 @@ public interface IProductService
     Task<long> CreateProduct(ProductEntity product);
     Task<ProductEntity?> GetProduct(long id);
     Task<List<ProductEntity>> GetProducts();
+    Task<List<ProductEntity>?> GetProductsByName(string name);
+    Task<List<ProductEntity>?> GetProductByPrice(decimal price);
     Task<long> UpdateProductData(long id, string name, string description, decimal price);
     Task<long> UpdateProductImage(long id, string imageUrl);
     Task<bool> RemoveProduct(long id);
