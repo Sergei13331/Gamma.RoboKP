@@ -16,6 +16,30 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         return await productRepository.Get(id);
     }
 
+    public async Task<ProductEntity?> GetProductWithDiscount(long id, string status)
+    {
+        var product = await productRepository.Get(id);
+        if (product == null) return null;
+        
+        var price = product.Price;
+
+        if (status == "Silver")
+        {
+            price *= 0.9m; //TODO: временно написал скидку руками, нужно понят как часто она меняется
+        }
+        else if (status == "Gold")
+        {
+            price *= 0.8m;
+        }
+        else if (status == "Platinum")
+        {
+            price *= 0.7m;
+        }
+        product.ChangePrice(price);  
+        
+        return product;
+    }
+    
     public async Task<List<ProductEntity>> GetProducts()
     {
         return await productRepository.GetAll();

@@ -9,7 +9,7 @@ public interface IProductService
     Task<List<ProductEntity>> GetProducts();
     Task<List<ProductEntity>?> GetProductsByName(string name);
     Task<List<ProductEntity>?> GetProductByPrice(decimal price);
-
+    Task<ProductEntity?> GetProductWithDiscount(long id, string status);
     Task<List<ProductEntity>?> SearchAndFilter(string? name = null, decimal? exactPrice = null,
         decimal? minPrice = null, decimal? maxPrice = null, int page = 1, int pageSize = 50);
     Task<long> UpdateProductData(long id, string name, string description, decimal price);

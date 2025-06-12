@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Domain.Enums;
 using Gamma.RoboKP.Models.Product;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gamma.RoboKP.Controllers;
@@ -12,6 +15,7 @@ public class ProductController(
     IProductService productService, 
     [FromKeyedServices("ControllerMapper")] IMapper mapper) : ControllerBase
 {
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
     public async Task<ActionResult<long>> AddProduct(ProductToAddDto productDto)
     {
@@ -31,6 +35,22 @@ public class ProductController(
         return Ok(response);
     }
 
+    [Authorize]
+    [HttpGet("{id}/discount")]
+    public async Task<ActionResult<ProductResponseDto>> GetProductByDiscount(long id)
+    {
+        var userStatus = User.FindFirst(ClaimTypes.UserData)?.Value;
+        
+        if (userStatus == null) return Unauthorized();
+        
+        var productEntity = await productService.GetProductWithDiscount(id, userStatus);
+        if (productEntity == null) return NotFound();
+        
+        var response = mapper.Map<ProductResponseDto>(productEntity);
+        
+        return Ok(response);
+    }
+    
     [HttpGet]
     public async Task<ActionResult<List<ProductResponseDto>>> GetProducts()
     {

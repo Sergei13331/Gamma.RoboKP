@@ -66,6 +66,7 @@ public class TokenService(IRefreshTokenService refreshTokenService,
         claims.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, "test"));
         claims.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, "test1"));
         claims.AddClaim(new Claim(ClaimTypes.Role, userRegisterModel.Role.ToString()));
+        claims.AddClaim(new Claim(ClaimTypes.UserData, userRegisterModel.Status.ToString()));
     
         return claims;
     }
