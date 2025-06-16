@@ -18,6 +18,9 @@ public class ProductEntity : BaseEntity<long>
     public string? Description { get; private set; }
     public decimal Price { get; private set; }
     public string? ImageUrl { get; private set; }
+    
+    public long CategoryId { get; private set; }
+    public long SubCategoryId { get; private set; }
 
     public void ChangeName(string name)
     {
@@ -34,12 +37,17 @@ public class ProductEntity : BaseEntity<long>
         Price = price;
     }
 
+    public void SetCategory(long id)
+    {
+        CategoryId = id;
+    }
+
     public void ChangeImage(string image)
     {
         ImageUrl = image;
     }
 
-    public ProductEntity Create(string name, string description, decimal price, string image)
+    public static ProductEntity Create(string name, string description, decimal price, string image)
     {
         return new ProductEntity(name, description, price, image);
     }

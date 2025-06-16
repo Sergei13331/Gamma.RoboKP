@@ -10,5 +10,7 @@ public record ProductToAddDto(
     [Required]
     decimal Price,
     [Required]
-    string ImageUrl
+    string ImageUrl,
+    [Required]
+    long SubCategoryId
     );

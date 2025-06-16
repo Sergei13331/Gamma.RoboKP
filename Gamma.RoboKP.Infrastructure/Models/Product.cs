@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace Gamma.RoboKP.Infrastructure.Models;
 
@@ -16,4 +15,8 @@ public class Product
     [Required]
     [MaxLength(500)]
     public string ImageUrl { get; set; } = string.Empty;
+    public long CategoryId { get; set; }
+    public long SubCategoryId { get; set; }
+    public required Category Category { get; set; }
+    public required SubCategory SubCategory { get; set; }
 }

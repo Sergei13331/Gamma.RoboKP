@@ -12,14 +12,20 @@ namespace Gamma.RoboKP.Controllers;
 [ApiController]
 [Route("api/products")]
 public class ProductController(
-    IProductService productService, 
+    IProductService productService,
+    ISubCategoryService subCategoryService,
     [FromKeyedServices("ControllerMapper")] IMapper mapper) : ControllerBase
 {
     [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
-    public async Task<ActionResult<long>> AddProduct(ProductToAddDto productDto)
+    public async Task<ActionResult<long>> AddProduct([FromBody] ProductToAddDto productDto)
     {
         var product = mapper.Map<ProductEntity>(productDto);
+        
+        var subCategory = await subCategoryService.GetSubCategory(productDto.SubCategoryId);
+        if (subCategory == null) return NotFound("Подкатегория не найдена");
+        
+        product.SetCategory(subCategory.ParentCategoryId);
         
         var response = await productService.CreateProduct(product);
         
