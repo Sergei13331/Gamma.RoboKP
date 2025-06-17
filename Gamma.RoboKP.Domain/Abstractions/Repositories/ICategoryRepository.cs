@@ -5,4 +5,8 @@ namespace Gamma.RoboKP.Domain.Abstractions.Repositories;
 public interface ICategoryRepository
 {
     Task<long> Create(CategoryEntity category);
+    Task<CategoryEntity?> Get(long id);
+    Task<List<CategoryEntity>> GetAll();
+    Task<long> Update(long id, string name);
+    Task<bool> Delete(long id);
 }

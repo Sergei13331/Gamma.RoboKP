@@ -18,4 +18,32 @@ public class CategoryController([FromKeyedServices("ControllerMapper")] IMapper 
 
         return Ok(response);
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<string?>> GetCategory(long id)
+    {
+        var entity = await categoryService.GetCategory(id);
+        return entity != null ? Ok(entity.Id) : NotFound();
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<string>>> GetCategories()
+    {
+        var entities = await categoryService.GetCategories();
+        return Ok(entities.Select(entity => entity.Name));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<long>> UpdateCategory(long id, string name)
+    {
+        var result = await categoryService.UpdateCategory(id, name);
+        return result != 0 ? Ok(result) : NotFound();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteCategory(long id)
+    {
+        var result = await categoryService.DeleteCategory(id);
+        return result ? Ok() : NotFound();
+    }
 } 

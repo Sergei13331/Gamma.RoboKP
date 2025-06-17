@@ -28,4 +28,27 @@ public class SubCategoryRepository(
         
         return subCategory != null ? mapper.Map<SubCategory, SubCategoryEntity>(subCategory) : null;
     }
+
+    public async Task<List<SubCategoryEntity>> GetAll()
+    {
+        var subCategories = await context.SubCategories.ToListAsync();
+        return mapper.Map<List<SubCategoryEntity>>(subCategories);
+    }
+
+    public async Task<(long, long)> Update(long id, string name, long parentCategoryId)
+    {
+        var subCategory = await context.SubCategories.FindAsync(id);
+        if (subCategory == null) return (0, 0);
+        if (subCategory.Name != name) subCategory.Name = name;
+        if (subCategory.ParentCategoryId != parentCategoryId) subCategory.ParentCategoryId = parentCategoryId;
+        return await context.SaveChangesAsync() > 0 ? (id, parentCategoryId) : (0, 0);
+    }
+
+    public async Task<bool> Delete(long id)
+    {
+        var subCategory = await context.SubCategories.FindAsync(id);
+        if (subCategory == null) return false;
+        context.SubCategories.Remove(subCategory);
+        return await context.SaveChangesAsync() > 0;
+    }
 }
