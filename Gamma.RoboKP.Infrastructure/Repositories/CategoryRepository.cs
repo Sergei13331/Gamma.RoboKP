@@ -22,6 +22,30 @@ public class CategoryRepository(
         return productDb.Id;
     }
 
+    // TODO Этот функционал не работает! При переводе значений в список кортежей, результат пустой
+    public async Task<List<(CategoryEntity, List<SubCategoryEntity>)>> GetAllWithSubCategories()
+    {
+        var categoriesDb = await context.Categories.ToListAsync();
+        var categories = mapper.Map<List<CategoryEntity>>(categoriesDb);
+        var result = categories.Select(
+            cat => (
+                cat,
+                mapper.Map<List<SubCategoryEntity>>(
+                context.SubCategories.Where(sc => sc.ParentCategoryId == cat.Id).ToListAsync()
+                )
+            )).ToList();
+        return result;
+    }
+    
+    public async Task<(CategoryEntity, List<SubCategoryEntity>)?> GetWithSubCategories(long categoryId)
+    {
+        var category = await context.Categories.FindAsync(categoryId);
+        if (category == null) return null;
+        var subCategories = await (context.SubCategories.Where(sc => sc.ParentCategoryId == categoryId
+        ).ToListAsync());
+        return (mapper.Map<CategoryEntity>(category), mapper.Map<List<SubCategoryEntity>>(subCategories));
+    }
+
     public async Task<CategoryEntity?> Get(long id)
     {
         var category = await context.Categories.FindAsync(id);

@@ -1,12 +1,16 @@
 using Gamma.RoboKP.Domain.Abstractions.Services;
 using Gamma.RoboKP.Domain.Entities;
+using Gamma.RoboKP.Models.SubCategory;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gamma.RoboKP.Controllers;
 
 [ApiController]
 [Route("api/subcategories")]
-public class SubCategoryController(ISubCategoryService subCategoryService) : ControllerBase
+public class SubCategoryController(
+    [FromKeyedServices("RepositoryMapper")] IMapper mapper,
+    ISubCategoryService subCategoryService) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<(long, long)>> CreateSubCategory(string name, long parentCategoryId)
@@ -19,17 +23,17 @@ public class SubCategoryController(ISubCategoryService subCategoryService) : Con
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<(long, long)>> GetSubCategory(long id)
+    public async Task<ActionResult<SubCategoryResponseDto>> GetSubCategory(long id)
     {
         var subCategoryEntity = await subCategoryService.GetSubCategory(id);
-        return subCategoryEntity != null ? Ok((subCategoryEntity.Name, subCategoryEntity.ParentCategoryId)) : NotFound();
+        return subCategoryEntity != null ? Ok(mapper.Map<SubCategoryResponseDto>(subCategoryEntity)) : NotFound();
     }
 
     [HttpGet]
     public async Task<ActionResult<List<(long, long)>>> GetSubCategories()
     {
         var subCategories = await subCategoryService.GetSubCategories();
-        return Ok(subCategories.Select(e => (e.Name, e.ParentCategoryId)));
+        return Ok(mapper.Map<List<SubCategoryResponseDto>>(subCategories));
     }
 
     [HttpPut("{id}")]
