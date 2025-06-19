@@ -52,16 +52,49 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         
         return mapper.Map<List<ProductEntity>>(productDb);
     }
+
+    public async Task<List<ProductEntity>?> SearchByCategory(long categoryId, long? subCategoryId = null)
+    {
+        var category = await context.Categories.FindAsync(categoryId);
+        if (category == null) return null;
+        var subCategory = await context.SubCategories.FindAsync(subCategoryId);
+        if (subCategory == null) return null;
+        
+        var query = context.Products.Where(p => p.CategoryId == categoryId);
+        
+        if (subCategoryId.HasValue)
+        {
+            query = query.Where(p => p.SubCategoryId == subCategoryId);
+        }
+        
+        var products = await query.ToListAsync();
+        
+        return products.Count != 0
+            ? mapper.Map<List<ProductEntity>>(products) 
+            : null;
+    }
     
     public async Task<List<ProductEntity>?> SearchProducts(
         string? name = null,
         decimal? exactPrice = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
+        long? categoryId = null,
+        long? subCategoryId = null,
         int pageNumber = 1,
         int pageSize = 50)
     {
         var query = context.Products.AsNoTracking().AsQueryable();
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(p => p.CategoryId == categoryId);
+            
+            if (subCategoryId.HasValue)
+            {
+                query = query.Where(p => p.SubCategoryId == subCategoryId);
+            }
+        }
         
         if (exactPrice.HasValue)
         {
@@ -98,7 +131,7 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
             ? mapper.Map<List<ProductEntity>>(productDb) 
             : null;
     }
-    public async Task<long> Update(long id, string name, string description, decimal price)
+    public async Task<long> Update(long id, string name, string description, decimal price, SubCategoryEntity subCategory)
     {
         var productDb = await context.Products.FindAsync(id);
         if (productDb == null) return 0;
@@ -106,6 +139,9 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         if (productDb.Name != name) productDb.Name = name;
         if (productDb.Description != description) productDb.Description = description;
         if (productDb.Price != price) productDb.Price = price;
+        if (productDb.CategoryId != subCategory.ParentCategoryId) productDb.CategoryId = subCategory.ParentCategoryId;
+        if (productDb.SubCategoryId != subCategory.Id) productDb.CategoryId = subCategory.ParentCategoryId;
+        
         
         context.Products.Update(productDb);
         return await context.SaveChangesAsync() > 0 ? id : 0;

@@ -7,6 +7,7 @@ public record ProductToUpdate(
     string Name,
     [MaxLength(500)]
     string Description,
-    decimal Price
+    decimal Price,
+    long SubCategoryId
 );
     

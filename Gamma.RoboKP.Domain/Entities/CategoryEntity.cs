@@ -2,6 +2,10 @@ namespace Gamma.RoboKP.Domain.Entities;
 
 public class CategoryEntity : BaseEntity<long>
 {
+    public CategoryEntity()
+    {
+    }
+    
     private CategoryEntity(string name)
     {
         Name = name;

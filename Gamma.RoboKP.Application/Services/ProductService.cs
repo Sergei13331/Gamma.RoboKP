@@ -55,21 +55,28 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         return await productRepository.SearchByPrice(price);
     }
 
+    public async Task<List<ProductEntity>?> GetProductByCategory(long categoryId, long? subCategoryId = null)
+    {
+        return await productRepository.SearchByCategory(categoryId, subCategoryId);
+    }
+
     public async Task<List<ProductEntity>?> SearchAndFilter(
         string? name = null,
         decimal? exactPrice = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
+        long? categoryId = null,
+        long? subCategoryId = null,
         int page = 1,
         int pageSize = 50
         )
     {
-        return await productRepository.SearchProducts(name, exactPrice, minPrice, maxPrice);
+        return await productRepository.SearchProducts(name, exactPrice, minPrice, maxPrice, categoryId, subCategoryId);
     }
 
-    public Task<long> UpdateProductData(long id, string name, string description, decimal price)
+    public Task<long> UpdateProductData(long id, string name, string description, decimal price, SubCategoryEntity subCategory)
     {
-        return productRepository.Update(id, name, description, price);
+        return productRepository.Update(id, name, description, price, subCategory);
     }
 
     public Task<long> UpdateProductImage(long id, string imageUrl)

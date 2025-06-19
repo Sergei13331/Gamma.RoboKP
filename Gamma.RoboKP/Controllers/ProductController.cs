@@ -87,16 +87,29 @@ public class ProductController(
         return Ok(response);
     }
 
+    [HttpGet("category")]
+    public async Task<ActionResult<List<ProductResponseDto>>> SearchByCategory(
+        [FromQuery] long categoryId,
+        [FromQuery] long? subCategoryId
+        )
+    {
+        var result = await productService.GetProductByCategory(categoryId, subCategoryId);
+        return result != null ? Ok(mapper.Map<List<ProductResponseDto>>(result)) : NotFound();
+    }
+
     [HttpGet("search")]
     public async Task<ActionResult<List<ProductResponseDto>>> SearchProducts(
         [FromQuery] string? name,
         [FromQuery] decimal? exactPrice,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
+        [FromQuery] long? categoryId,
+        [FromQuery] long? subCategoryId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
-        var result = await productService.SearchAndFilter(name, exactPrice, minPrice, maxPrice, page, pageSize);
+        var result = await productService.SearchAndFilter(name, exactPrice, minPrice, maxPrice, 
+            categoryId, subCategoryId, page, pageSize);
         if (result is null) return NotFound();
         
         var response = mapper.Map<List<ProductResponseDto>>(result);
@@ -106,7 +119,10 @@ public class ProductController(
     [HttpPatch("{id}")]
     public async Task<ActionResult<long>> UpdateData([FromRoute]long id, [FromBody] ProductToUpdate productDto)
     {
-        var result = await productService.UpdateProductData(id, productDto.Name, productDto.Description, productDto.Price);
+        var subCategory = await subCategoryService.GetSubCategory(productDto.SubCategoryId);
+        if (subCategory == null) return NotFound("Подкатегория не найдена");
+        
+        var result = await productService.UpdateProductData(id, productDto.Name, productDto.Description, productDto.Price, subCategory);
         if (result == 0) return NotFound();
         return Ok(result);
     }

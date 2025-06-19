@@ -12,5 +12,7 @@ public record ProductResponseDto(
     [Required]
     decimal Price,
     [Required]
-    string ImageUrl
+    string ImageUrl,
+    [Required]
+    long SubCategoryId
     );
