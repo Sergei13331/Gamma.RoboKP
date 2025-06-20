@@ -15,7 +15,7 @@ public class SubCategoryRepository(
     public async Task<(long, long)> CreateSubCategory(SubCategoryEntity subCategory)
     {
         var category = await context.Categories.FindAsync(subCategory.Id);
-        if (category == null) return (0, 0);
+        if (category != null) return (0, 0);
         var subCategoryDb = mapper.Map<SubCategoryEntity, SubCategory>(subCategory);
         
         await context.AddAsync(subCategoryDb);

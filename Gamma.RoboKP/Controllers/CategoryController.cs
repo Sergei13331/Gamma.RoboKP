@@ -23,22 +23,23 @@ public class CategoryController([FromKeyedServices("ControllerMapper")] IMapper 
     [HttpGet("{id}/with_subcategories")]
     public async Task<ActionResult<CategoryWithSubcategoriesResponseDto>> GetCategoryWithSubcategories(long id)
     {
-        var result = await categoryService.GetSubCategoriesByCategory(id);
-        if (result == null) return NotFound();
-        var (category, subCategories) = result.Value;
-        var dto = new CategoryWithSubcategoriesResponseDto
-            (category.Id, category.Name, mapper.Map<List<SubcategoryInnerResponseDto>>(subCategories));
-        return Ok(dto);
+        var category = await categoryService.GetSubCategoriesByCategory(id);
+        
+        if (category == null) return NotFound();
+        
+        var response = mapper.Map<CategoryWithSubcategoriesResponseDto>(category);
+        
+        return Ok(response);
     }
 
     [HttpGet("with_subcategories")]
     public async Task<ActionResult<List<CategoryWithSubcategoriesResponseDto>>> GetCategoriesWithSubCategories()
-    {
-        var categoriesWithSub = await categoryService.GetCategoriesWithSubCategories();
-        var result = categoriesWithSub.Select(ent =>
-            (ent.Item1.Id, ent.Item1.Name, mapper.Map<List<SubcategoryInnerResponseDto>>(ent.Item2))
-        ).ToList();
-        return Ok(result);
+    {   
+        var categories = await categoryService.GetCategoriesWithSubCategories();
+        if (!categories.Any()) return NotFound();
+        
+        var response = mapper.Map<List<CategoryWithSubcategoriesResponseDto>>(categories);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]

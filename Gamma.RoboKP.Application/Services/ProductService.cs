@@ -35,6 +35,7 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         {
             price *= 0.7m;
         }
+        
         product.ChangePrice(price);  
         
         return product;
@@ -55,7 +56,7 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         return await productRepository.SearchByPrice(price);
     }
 
-    public async Task<List<ProductEntity>?> GetProductByCategory(long categoryId, long? subCategoryId = null)
+    public async Task<List<ProductEntity>?> GetProductByCategory(long? categoryId = null, long? subCategoryId = null)
     {
         return await productRepository.SearchByCategory(categoryId, subCategoryId);
     }

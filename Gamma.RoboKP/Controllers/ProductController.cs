@@ -89,10 +89,15 @@ public class ProductController(
 
     [HttpGet("category")]
     public async Task<ActionResult<List<ProductResponseDto>>> SearchByCategory(
-        [FromQuery] long categoryId,
+        [FromQuery] long? categoryId,
         [FromQuery] long? subCategoryId
         )
     {
+        if (categoryId == null && subCategoryId == null)
+        {
+            return BadRequest();
+        }
+        
         var result = await productService.GetProductByCategory(categoryId, subCategoryId);
         return result != null ? Ok(mapper.Map<List<ProductResponseDto>>(result)) : NotFound();
     }

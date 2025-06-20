@@ -6,9 +6,9 @@ public interface ICategoryRepository
 {
     Task<long> Create(CategoryEntity category);
     Task<CategoryEntity?> Get(long id);
-    Task<(CategoryEntity, List<SubCategoryEntity>)?> GetWithSubCategories(long categoryId);
+    Task<CategoryEntity?> GetWithSubCategories(long categoryId);
     Task<List<CategoryEntity>> GetAll();
-    Task<List<(CategoryEntity, List<SubCategoryEntity>)>> GetAllWithSubCategories();
+    Task<List<CategoryEntity>> GetAllWithSubCategories();
     Task<long> Update(long id, string name);
     Task<bool> Delete(long id);
 }

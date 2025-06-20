@@ -11,12 +11,12 @@ public class CategoryService(ICategoryRepository categoryRepository) : ICategory
         return await categoryRepository.Create(categoryEntity);
     }
     
-    public async Task<(CategoryEntity, List<SubCategoryEntity>)?> GetSubCategoriesByCategory(long categoryId)
+    public async Task<CategoryEntity?> GetSubCategoriesByCategory(long categoryId)
     {
         return await categoryRepository.GetWithSubCategories(categoryId);
     }
 
-    public async Task<List<(CategoryEntity, List<SubCategoryEntity>)>> GetCategoriesWithSubCategories()
+    public async Task<List<CategoryEntity>> GetCategoriesWithSubCategories()
     {
         return await categoryRepository.GetAllWithSubCategories();
     }

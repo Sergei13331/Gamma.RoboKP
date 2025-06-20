@@ -52,16 +52,29 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         
         return mapper.Map<List<ProductEntity>>(productDb);
     }
-
-    public async Task<List<ProductEntity>?> SearchByCategory(long categoryId, long? subCategoryId = null)
+    
+    public async Task<List<ProductEntity>?> SearchByCategory(long? categoryId = null, long? subCategoryId = null)
     {
-        var category = await context.Categories.FindAsync(categoryId);
-        if (category == null) return null;
-        var subCategory = await context.SubCategories.FindAsync(subCategoryId);
-        if (subCategory == null) return null;
+        if (categoryId != null)
+        {
+            var category = await context.Categories.FindAsync(categoryId);
+            if (category == null) return null;
+        }
+
+        if (subCategoryId != null)
+        {
+            var subCategory = await context.SubCategories.FindAsync(subCategoryId);
+            if (subCategory == null) return null;
+        }
+
+        var query = context.Products.AsNoTracking().AsQueryable();
         
-        var query = context.Products.Where(p => p.CategoryId == categoryId);
-        
+        if (categoryId != null)
+        {
+
+            query = context.Products.Where(p => p.CategoryId == categoryId);
+        }
+
         if (subCategoryId.HasValue)
         {
             query = query.Where(p => p.SubCategoryId == subCategoryId);
@@ -69,7 +82,7 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         
         var products = await query.ToListAsync();
         
-        return products.Count != 0
+        return products.Any()
             ? mapper.Map<List<ProductEntity>>(products) 
             : null;
     }
@@ -90,10 +103,11 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
         {
             query = query.Where(p => p.CategoryId == categoryId);
             
-            if (subCategoryId.HasValue)
-            {
-                query = query.Where(p => p.SubCategoryId == subCategoryId);
-            }
+        }
+        
+        if (subCategoryId.HasValue)
+        {
+            query = query.Where(p => p.SubCategoryId == subCategoryId);
         }
         
         if (exactPrice.HasValue)
@@ -131,6 +145,7 @@ public class ProductRepository([FromKeyedServices("RepositoryMapper")] IMapper m
             ? mapper.Map<List<ProductEntity>>(productDb) 
             : null;
     }
+    
     public async Task<long> Update(long id, string name, string description, decimal price, SubCategoryEntity subCategory)
     {
         var productDb = await context.Products.FindAsync(id);

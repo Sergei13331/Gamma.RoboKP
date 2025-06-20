@@ -12,6 +12,7 @@ public class CategoryEntity : BaseEntity<long>
     }
     
     public string Name { get; private set; }
+    public List<SubCategoryEntity> SubCategories { get; private set; }
 
     public static CategoryEntity Create(string name)
     {

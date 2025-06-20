@@ -21,29 +21,27 @@ public class CategoryRepository(
         
         return productDb.Id;
     }
-
-    // TODO Этот функционал не работает! При переводе значений в список кортежей, результат пустой
-    public async Task<List<(CategoryEntity, List<SubCategoryEntity>)>> GetAllWithSubCategories()
+    
+    public async Task<List<CategoryEntity>> GetAllWithSubCategories()
     {
-        var categoriesDb = await context.Categories.ToListAsync();
-        var categories = mapper.Map<List<CategoryEntity>>(categoriesDb);
-        var result = categories.Select(
-            cat => (
-                cat,
-                mapper.Map<List<SubCategoryEntity>>(
-                context.SubCategories.Where(sc => sc.ParentCategoryId == cat.Id).ToListAsync()
-                )
-            )).ToList();
+        var categoriesDb = await context.Categories.Include(category => category.SubCategories).ToListAsync();
+
+        var result = mapper.Map<List<Category>, List<CategoryEntity>>(categoriesDb);
+        
         return result;
     }
     
-    public async Task<(CategoryEntity, List<SubCategoryEntity>)?> GetWithSubCategories(long categoryId)
+    public async Task<CategoryEntity?> GetWithSubCategories(long categoryId)
     {
-        var category = await context.Categories.FindAsync(categoryId);
-        if (category == null) return null;
-        var subCategories = await (context.SubCategories.Where(sc => sc.ParentCategoryId == categoryId
-        ).ToListAsync());
-        return (mapper.Map<CategoryEntity>(category), mapper.Map<List<SubCategoryEntity>>(subCategories));
+        var categoryWithSubs = await context.Categories
+            .Include(c => c.SubCategories)
+            .FirstOrDefaultAsync(c => c.Id == categoryId);
+
+        if (categoryWithSubs == null) return null;
+        
+        var result = mapper.Map<Category, CategoryEntity>(categoryWithSubs);
+        
+        return (result);
     }
 
     public async Task<CategoryEntity?> Get(long id)

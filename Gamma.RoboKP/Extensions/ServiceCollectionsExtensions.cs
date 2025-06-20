@@ -107,6 +107,7 @@ public static class ServiceCollectionsExtensions
                     IssuerSigningKey = // для валидации токена
                         new SymmetricSecurityKey(
                             Encoding.ASCII.GetBytes(builder.Configuration["Authentication:TokenPrivateKey"]!)),
+                    
                     ValidIssuer = "test",
                     ValidAudience = "test",
                     ValidateIssuer = true,
