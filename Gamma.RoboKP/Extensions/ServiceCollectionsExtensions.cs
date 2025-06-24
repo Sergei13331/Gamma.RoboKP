@@ -75,6 +75,7 @@ public static class ServiceCollectionsExtensions
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
+        builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
         
         
         builder.Services.AddScoped<IProductService, ProductService>();
@@ -85,6 +86,7 @@ public static class ServiceCollectionsExtensions
         builder.Services.AddTransient<IMailService, MailService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
+        builder.Services.AddScoped<IDiscountService, DiscountService>();
         
         return builder;
     }
