@@ -6,5 +6,5 @@ public record UserStatusResponseDto(
     [Required]
     string Status,
     [Required]
-    long DiscountPercent
+    long Percent
     );

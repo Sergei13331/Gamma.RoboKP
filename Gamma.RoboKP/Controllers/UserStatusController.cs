@@ -23,7 +23,7 @@ public class UserStatusController(
     public async Task<ActionResult<UserStatusResponseDto>> GetAllStatuses()
     {
         var entities = await discountService.GetAll();
-        return Ok(mapper.Map<UserStatusResponseDto>(entities));
+        return Ok(mapper.Map<List<UserStatusResponseDto>>(entities));
     }
 
     [HttpGet("{status}")]

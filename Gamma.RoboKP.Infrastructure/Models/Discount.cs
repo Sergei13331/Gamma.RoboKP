@@ -9,6 +9,7 @@ public class Discount
         Status = status;
         Percent = percent;
     }
+    [Key]
     [MaxLength(50)]
     public string Status { get; set; } = string.Empty;
     [Required]
