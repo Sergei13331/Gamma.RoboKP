@@ -18,12 +18,15 @@ public class RoboKpDbContext : IdentityDbContext<AppUser, IdentityRoleEntity, lo
     public DbSet<Category> Categories { get; set; }
     public DbSet<SubCategory> SubCategories { get; set; }
     public DbSet<Discount> Discounts { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartProduct> CartProducts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new AppUserConfiguration());
+        modelBuilder.ApplyConfiguration(new CartProductConfiguration());
 
         modelBuilder.Entity<AppUser>()
             .Property(u => u.Status)
